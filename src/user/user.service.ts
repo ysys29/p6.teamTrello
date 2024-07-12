@@ -32,7 +32,6 @@ export class UserService {
       boardMembers: user.boardMembers.map((boardMember) => ({
         id: boardMember.id,
         boardId: boardMember.boardId,
-        userId: boardMember.userId,
       })),
     };
 
