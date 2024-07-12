@@ -7,13 +7,17 @@ import {
   Entity,
   JoinColumn,
   ManyToOne,
+  OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
+import { BoardMember } from './board-member.entity';
+import { BoardInvitation } from './board-invitation.entity';
+import { List } from 'src/list/entities/list.entity';
 
 @Entity('boards')
 export class Board {
-  @PrimaryGeneratedColumn({ unsigned: true })
+  @PrimaryGeneratedColumn()
   id: number;
 
   @Column({ name: 'owner_id' })
@@ -24,8 +28,10 @@ export class Board {
   @Column()
   title: string;
 
+  @Column()
   description: string;
 
+  @Column()
   color: string;
 
   @CreateDateColumn()
@@ -40,4 +46,13 @@ export class Board {
   @ManyToOne((type) => User, (user) => user.boards)
   @JoinColumn({ name: 'owner_id' })
   user: User;
+
+  @OneToMany((type) => BoardMember, (boardMember) => boardMember.board)
+  boardMembers: BoardMember[];
+
+  @OneToMany((type) => BoardInvitation, (boardInvitation) => boardInvitation.board)
+  boardInvitations: BoardInvitation[];
+
+  @OneToMany((type) => List, (list) => list.board)
+  lists: List[];
 }

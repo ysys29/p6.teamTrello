@@ -1,5 +1,8 @@
 import { IsEmail, IsNotEmpty, IsNumber, IsString, IsStrongPassword } from 'class-validator';
+import { BoardMember } from 'src/board/entities/board-member.entity';
 import { Board } from 'src/board/entities/board.entity';
+import { CardMember } from 'src/card/entities/card-member.entity';
+import { Comment } from 'src/comment/entities/comment.entity';
 import {
   Column,
   CreateDateColumn,
@@ -12,7 +15,7 @@ import {
 
 @Entity('users')
 export class User {
-  @PrimaryGeneratedColumn({ unsigned: true })
+  @PrimaryGeneratedColumn()
   id: number;
 
   /**
@@ -67,4 +70,13 @@ export class User {
 
   @OneToMany((type) => Board, (board) => board.user)
   boards: Board[];
+
+  @OneToMany((type) => BoardMember, (boardMember) => boardMember.user)
+  boardMembers: BoardMember[];
+
+  @OneToMany((type) => CardMember, (cardMember) => cardMember.user)
+  cardMembers: CardMember[];
+
+  @OneToMany((type) => Comment, (comment) => comment.user)
+  comments: Comment[];
 }
