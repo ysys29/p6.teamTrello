@@ -62,4 +62,21 @@ export class ListService {
 
     return true;
   }
+
+  // 리스트 상세 조회
+  async getList(listId: number) {
+    const list = await this.listRepository.findOne({
+      where: { id: listId },
+      relations: ['cards'],
+    });
+
+    if (!list) {
+      throw new NotFoundException('해당하는 아이디의 리스트가 존재하지 않습니다.');
+    }
+
+    //카드를 lexoRank를 기준으로 정렬(asc로)
+    list.cards.sort((a, b) => a.lexoRank.localeCompare(b.lexoRank));
+
+    return list;
+  }
 }
