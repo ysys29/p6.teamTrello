@@ -11,7 +11,7 @@ export class BoardInvitation {
   boardId: number;
 
   @Column()
-  userEmail: string;
+  email: string;
 
   @Column({ type: 'enum', enum: InvitationStatus, default: InvitationStatus.INVITED })
   status: InvitationStatus;

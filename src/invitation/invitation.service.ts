@@ -48,7 +48,7 @@ export class InvitationService {
 
     // 이미 초대해서, invited 상태인 유저면 에러
     const existingInvitation = await this.boardInvitationRepository.findOne({
-      where: { boardId, userEmail: email, status: InvitationStatus.INVITED },
+      where: { boardId, email, status: InvitationStatus.INVITED },
     });
 
     if (existingInvitation) {
@@ -56,8 +56,24 @@ export class InvitationService {
     }
 
     // 초대 저장하기
-    await this.boardInvitationRepository.save({ boardId, userEmail: email });
+    await this.boardInvitationRepository.save({ boardId, email });
 
     return true;
+  }
+
+  // 내 초대 목록 조회하기
+  async getReceivedInvitations(userId: number) {
+    // 받은 아이디로 유저의 이메일 찾기
+    const user = await this.userRepository.findOneBy({ id: userId });
+
+    if (!user) {
+      throw new NotFoundException('사용자가 존재하지 않습니다.');
+    }
+
+    const invitations = await this.boardInvitationRepository.find({
+      where: { email: user.email },
+    });
+
+    return invitations;
   }
 }

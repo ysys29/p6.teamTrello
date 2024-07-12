@@ -1,4 +1,4 @@
-import { Body, Controller, Post, Request, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Post, Request, UseGuards } from '@nestjs/common';
 import { InvitationService } from './invitation.service';
 import { AuthGuard } from '@nestjs/passport';
 import { SendInvitationDto } from './dtos/send-invitation.dto';
@@ -12,5 +12,12 @@ export class InvitationController {
   @Post()
   async sendInvitation(@Request() user, @Body() sendInvitationDto: SendInvitationDto) {
     return await this.invitationService.sendInvitation(user.id, sendInvitationDto);
+  }
+
+  // 내가 받은 초대 목록 조회
+  @UseGuards(AuthGuard('jwt'))
+  @Get('me')
+  async getReceivedInvitations(@Request() req) {
+    return this.invitationService.getReceivedInvitations(req.user.id);
   }
 }
