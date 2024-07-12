@@ -1,34 +1,16 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Body, Controller, Post, Request, UseGuards } from '@nestjs/common';
 import { InvitationService } from './invitation.service';
-import { CreateInvitationDto } from './dto/create-invitation.dto';
-import { UpdateInvitationDto } from './dto/update-invitation.dto';
+import { AuthGuard } from '@nestjs/passport';
+import { SendInvitationDto } from './dtos/send-invitation.dto';
 
-@Controller('invitation')
+@Controller('invitations')
 export class InvitationController {
   constructor(private readonly invitationService: InvitationService) {}
 
+  // 초대 보내기(보드 멤버 모두가 초대를 보낼 수 있음)
+  @UseGuards(AuthGuard('jwt'))
   @Post()
-  create(@Body() createInvitationDto: CreateInvitationDto) {
-    return this.invitationService.create(createInvitationDto);
-  }
-
-  @Get()
-  findAll() {
-    return this.invitationService.findAll();
-  }
-
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.invitationService.findOne(+id);
-  }
-
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateInvitationDto: UpdateInvitationDto) {
-    return this.invitationService.update(+id, updateInvitationDto);
-  }
-
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.invitationService.remove(+id);
+  async sendInvitation(@Request() user, @Body() sendInvitationDto: SendInvitationDto) {
+    return await this.invitationService.sendInvitation(user.id, sendInvitationDto);
   }
 }

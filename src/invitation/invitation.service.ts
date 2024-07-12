@@ -1,26 +1,63 @@
-import { Injectable } from '@nestjs/common';
-import { CreateInvitationDto } from './dto/create-invitation.dto';
-import { UpdateInvitationDto } from './dto/update-invitation.dto';
+import { ConflictException, Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { BoardInvitation } from './entities/invitation.entity';
+import { Repository } from 'typeorm';
+import { SendInvitationDto } from './dtos/send-invitation.dto';
+import { BoardMember } from 'src/board/entities/board-member.entity';
+import { User } from 'src/user/entities/user.entity';
+import { InvitationStatus } from './types/invitation-status.type';
 
 @Injectable()
 export class InvitationService {
-  create(createInvitationDto: CreateInvitationDto) {
-    return 'This action adds a new invitation';
-  }
+  constructor(
+    @InjectRepository(BoardInvitation)
+    private readonly boardInvitationRepository: Repository<BoardInvitation>,
+    @InjectRepository(BoardMember)
+    private readonly boardMemberRepostitory: Repository<BoardMember>,
+    @InjectRepository(User)
+    private readonly userRepository: Repository<User>,
+  ) {}
 
-  findAll() {
-    return `This action returns all invitation`;
-  }
+  // 초대 보내기
+  async sendInvitation(userId: number, sendInvitationDto: SendInvitationDto) {
+    const { boardId, email } = sendInvitationDto;
 
-  findOne(id: number) {
-    return `This action returns a #${id} invitation`;
-  }
+    const isAvailableMember = await this.boardMemberRepostitory.findOne({
+      where: { boardId, userId },
+    });
 
-  update(id: number, updateInvitationDto: UpdateInvitationDto) {
-    return `This action updates a #${id} invitation`;
-  }
+    if (!isAvailableMember) {
+      throw new UnauthorizedException('초대 권한이 없습니다.');
+    }
 
-  remove(id: number) {
-    return `This action removes a #${id} invitation`;
+    // 해당 이메일의 유저가 존재하는지 찾기
+    const user = await this.userRepository.findOneBy({ email });
+
+    if (!user) {
+      throw new NotFoundException('해당하는 이메일의 유저가 존재하지 않습니다.');
+    }
+
+    // 이미 보드에 존재하는 멤버면 에러
+    const existingUser = await this.boardMemberRepostitory.findOne({
+      where: { boardId, userId: user.id },
+    });
+
+    if (existingUser) {
+      throw new ConflictException('이미 보드에 존재하는 멤버입니다.');
+    }
+
+    // 이미 초대해서, invited 상태인 유저면 에러
+    const existingInvitation = await this.boardInvitationRepository.findOne({
+      where: { boardId, userEmail: email, status: InvitationStatus.INVITED },
+    });
+
+    if (existingInvitation) {
+      throw new ConflictException('이미 초대한 멤버입니다. 수락을 기다려 주세요.');
+    }
+
+    // 초대 저장하기
+    await this.boardInvitationRepository.save({ boardId, userEmail: email });
+
+    return true;
   }
 }
