@@ -92,7 +92,7 @@ export class UserController {
 
     return {
       statusCode: HttpStatus.OK,
-      message: `사용자 조회에 성공했습니다.`,
+      message: `'${data.nickname}'님의 조회에 성공했습니다.`,
       data,
     };
   }
