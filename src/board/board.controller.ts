@@ -18,14 +18,14 @@ export class BoardController {
     return this.boardService.findAll();
   }
 
-  @Get(':id') //URL의 매개변수로 전달된 ID를 사용하여 보드 객체를 조회
+  @Get(':id') //URL주소에 전달된 ID를 사용하여 해당 보드를 조회
   async findOne(@Param('id') id: number): Promise<Board> {
     return this.boardService.findOne(id);
   }
 
-  @Patch(':id')
+  @Patch(':id') //URL주소에 전달된 ID를 사용하여 해당 보드를 수정
   update(@Param('id') id: string, @Body() updateBoardDto: UpdateBoardDto) {
-    return this.boardService.update(+id, updateBoardDto);
+    return this.boardService.update(Number(id), updateBoardDto);
   }
 
   @Delete(':id')

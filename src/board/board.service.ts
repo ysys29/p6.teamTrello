@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { CreateBoardDto } from './dtos/create-board.dto';
 import { UpdateBoardDto } from './dtos/update-board.dto';
 import { Repository } from 'typeorm';
@@ -38,8 +38,25 @@ export class BoardService {
     return board;
   }
   //보드 수정
-  update(id: number, updateBoardDto: UpdateBoardDto) {
-    return `This action updates a #${id} board`;
+  async update(id: number, updateBoardDto: UpdateBoardDto): Promise<Board> {
+    // 주어진 ID로 보드 객체를 조회
+    const board = await this.boardRepository.findOne({ where: { id } });
+
+    // 보드가 존재하지 않으면 에러
+    if (!board) {
+      throw new NotFoundException(`존재하지 않는 보드입니다.`);
+    }
+
+    // // 보드 생성자가 아니면 에러
+    // if (board.ownerId !== userId) {
+    //   throw new UnauthorizedException('보드수정은 생성자만 가능합니다.');
+    // }
+
+    // 보드 객체 업데이트
+    Object.assign(board, updateBoardDto);
+
+    // 업데이트된 보드 객체를 데이터베이스에 저장
+    return this.boardRepository.save(board);
   }
   //보드 삭제
   remove(id: number) {

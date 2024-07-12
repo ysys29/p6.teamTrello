@@ -12,7 +12,7 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 import { BoardMember } from './board-member.entity';
-import { BoardInvitation } from './board-invitation.entity';
+import { BoardInvitation } from 'src/invitation/entities/invitation.entity';
 import { List } from 'src/list/entities/list.entity';
 
 @Entity('boards')
