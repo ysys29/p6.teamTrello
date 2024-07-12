@@ -2,7 +2,7 @@ import { Body, Controller, Get, Param, Patch, Post, Request, UseGuards } from '@
 import { InvitationService } from './invitation.service';
 import { AuthGuard } from '@nestjs/passport';
 import { SendInvitationDto } from './dtos/send-invitation.dto';
-import { InvitationStatus } from './types/invitation-status.type';
+import { UpdateInvitationStatusDto } from './dtos/update-invitation-status.dto';
 
 @Controller('invitations')
 export class InvitationController {
@@ -28,8 +28,8 @@ export class InvitationController {
   async changeInvitationStatus(
     @Request() req,
     @Param('invitationId') invitationId: number,
-    @Body('status') status: InvitationStatus,
+    @Body('status') updateStatusDto: UpdateInvitationStatusDto,
   ) {
-    return this.invitationService.changeInvitationStatus(req.user.id, invitationId, status);
+    return this.invitationService.changeInvitationStatus(req.user.id, invitationId, updateStatusDto);
   }
 }

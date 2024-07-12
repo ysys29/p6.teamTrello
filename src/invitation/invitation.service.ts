@@ -14,6 +14,7 @@ import { SendInvitationDto } from './dtos/send-invitation.dto';
 import { BoardMember } from 'src/board/entities/board-member.entity';
 import { User } from 'src/user/entities/user.entity';
 import { InvitationStatus } from './types/invitation-status.type';
+import { UpdateInvitationStatusDto } from './dtos/update-invitation-status.dto';
 
 @Injectable()
 export class InvitationService {
@@ -87,7 +88,8 @@ export class InvitationService {
   }
 
   // 내가 받은 초대의 상태 변경
-  async changeInvitationStatus(userId: number, invitationId: number, status: InvitationStatus) {
+  async changeInvitationStatus(userId: number, invitationId: number, updateStatusDto: UpdateInvitationStatusDto) {
+    const { status } = updateStatusDto;
     const invitation = await this.boardInvitationRepository.findOneBy({ id: invitationId });
 
     if (!invitation) {
