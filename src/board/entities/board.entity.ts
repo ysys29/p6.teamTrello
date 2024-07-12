@@ -20,18 +20,18 @@ export class Board {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column({ name: 'owner_id' })
+  @Column({ name: 'owner_id', nullable: false })
   ownerId: number;
 
   @IsNotEmpty({ message: '보드 이름을 입력해 주세요.' })
   @IsString()
-  @Column()
+  @Column({ nullable: false })
   title: string;
 
-  @Column()
+  @Column({ nullable: false })
   description: string;
 
-  @Column()
+  @Column({ nullable: true, default: '#FFFFFF' })
   color: string;
 
   @CreateDateColumn()
@@ -40,7 +40,7 @@ export class Board {
   @UpdateDateColumn()
   updatedAt: Date;
 
-  @DeleteDateColumn()
+  @DeleteDateColumn({ nullable: true })
   deletedAt: Date;
 
   @ManyToOne((type) => User, (user) => user.boards)
