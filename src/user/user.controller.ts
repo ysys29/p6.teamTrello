@@ -1,4 +1,14 @@
-import { Controller, Get, Request, UseGuards, HttpStatus, Delete, Patch, Body } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Request,
+  UseGuards,
+  HttpStatus,
+  Delete,
+  Patch,
+  Body,
+  BadRequestException,
+} from '@nestjs/common';
 import { UserService } from './user.service';
 import { AuthGuard } from '@nestjs/passport';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
@@ -15,7 +25,7 @@ export class UserController {
   // }
 
   /**
-   * 내 정보 조회
+   * 내정보조회
    * @param req
    * @returns
    */
@@ -33,7 +43,7 @@ export class UserController {
   }
 
   /**
-   * 내 정보 수정
+   * 내정보수정
    * @param req
    * @param updateUserDto
    * @returns
@@ -42,17 +52,21 @@ export class UserController {
   @UseGuards(AuthGuard('jwt'))
   @Patch('/me')
   async update(@Request() req, @Body() updateUserDto: UpdateUserDto) {
-    const data = this.userService.update(req.user.id, updateUserDto);
+    if (!updateUserDto) {
+      throw new BadRequestException('수정할 내용을 입력해 주세요.');
+    }
+
+    const data = await this.userService.update(req.user.id, updateUserDto);
 
     return {
       statusCode: HttpStatus.OK,
       message: `내 정보 수정에 성공했습니다.`,
-      data,
+      data: data,
     };
   }
 
   /**
-   * 회원 탈퇴
+   * 회원탈퇴
    * @param req
    * @returns
    */

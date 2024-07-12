@@ -4,17 +4,6 @@ import { IsNotEmpty, IsOptional, IsString, IsStrongPassword, ValidateIf } from '
 
 export class UpdateUserDto {
   /**
-   * 기존 비밀번호
-   * @example "Example1!"
-   */
-  @IsStrongPassword(
-    { minLength: 8 },
-    {
-      message: `비밀번호는 영문 알파벳 대,소문자, 숫자, 특수문자(!@#$%^&*)를 포함해서 8자리 이상으로 입력해야 합니다.`,
-    },
-  )
-  newPassword: string;
-  /**
    * 새 비밀번호
    * @example "Example2!"
    */
@@ -22,10 +11,10 @@ export class UpdateUserDto {
   @IsStrongPassword(
     { minLength: 8 },
     {
-      message: `비밀번호는 영문 알파벳 대,소문자, 숫자, 특수문자(!@#$%^&*)를 포함해서 8자리 이상으로 입력해야 합니다.`,
+      message: `새 비밀번호는 영문 알파벳 대,소문자, 숫자, 특수문자(!@#$%^&*)를 포함해서 8자리 이상으로 입력해야 합니다.`,
     },
   )
-  password: string;
+  newPassword: string;
 
   /**
    * 새 비밀번호 확인
@@ -35,7 +24,7 @@ export class UpdateUserDto {
   @IsStrongPassword(
     { minLength: 8 },
     {
-      message: `비밀번호는 영문 알파벳 대,소문자, 숫자, 특수문자(!@#$%^&*)를 포함해서 8자리 이상으로 입력해야 합니다.`,
+      message: `새 비밀번호 확인은 영문 알파벳 대,소문자, 숫자, 특수문자(!@#$%^&*)를 포함해서 8자리 이상으로 입력해야 합니다.`,
     },
   )
   newPasswordConfirm: string;
