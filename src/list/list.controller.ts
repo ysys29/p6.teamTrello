@@ -14,31 +14,35 @@ export class ListController {
 
   // 리스트 상세 조회
   @Get(':listId')
-  async getList(@Param('listId') listId: number) {
-    return await this.listService.getList(listId);
+  async getList(@Body('userId') userId: number, @Param('listId') listId: number) {
+    return await this.listService.getList(userId, listId);
   }
 
   // 리스트 이름(title) 수정
   @Patch(':listId/title')
-  async updateListTitle(@Param('listId') listId: number, @Body('title') title: string) {
-    return await this.listService.updateListTitle(listId, title);
+  async updateListTitle(@Body('userId') userId: number, @Param('listId') listId: number, @Body('title') title: string) {
+    return await this.listService.updateListTitle(userId, listId, title);
   }
 
   // 리스트 순서 변경
   @Patch(':listId/reorder')
-  async reorderList(@Param('listId') listId: number, @Body() reorderListDto: ReorderListDto) {
-    return await this.listService.reorderList(listId, reorderListDto);
+  async reorderList(
+    @Body('userId') userId: number,
+    @Param('listId') listId: number,
+    @Body() reorderListDto: ReorderListDto,
+  ) {
+    return await this.listService.reorderList(userId, listId, reorderListDto);
   }
 
   // 리스트 삭제
   @Delete(':listId')
-  async deleteList(@Param('listId') listId: number) {
-    return await this.listService.deleteList(listId);
+  async deleteList(@Body('userId') userId: number, @Param('listId') listId: number) {
+    return await this.listService.deleteList(userId, listId);
   }
 
-  // 리스트 목록 조회
+  // 리스트 목록 조회 // 리스트 순서 변경 제대로 되나 확인용 api == 삭제 요
   @Get()
-  async getAllLists() {
-    return await this.listService.getAllLists();
+  async getAllLists(@Body('boardId') boardId: number) {
+    return await this.listService.getAllLists(boardId);
   }
 }
