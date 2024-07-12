@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, Post } from '@nestjs/common';
+import { Body, Controller, Get, Param, Patch, Post } from '@nestjs/common';
 import { ListService } from './list.service';
 
 @Controller('lists')
@@ -15,5 +15,11 @@ export class ListController {
   @Get(':listId')
   async getList(@Param('listId') listId: number) {
     return await this.listService.getList(listId);
+  }
+
+  // 리스트 이름(title) 수정
+  @Patch(':listId/title')
+  async updateListTitle(@Param('listId') listId: number, @Body('title') title: string) {
+    return await this.listService.updateListTitle(listId, title);
   }
 }

@@ -75,8 +75,29 @@ export class ListService {
     }
 
     //카드를 lexoRank를 기준으로 정렬(asc로)
-    list.cards.sort((a, b) => a.lexoRank.localeCompare(b.lexoRank));
+    list.cards.sort((a, b) => a.lexoRank.localeCompare(b.lexoRank)); //localCompare: 문자열과 문자열을 비교
 
     return list;
+  }
+
+  // 리스트 이름 수정
+  async updateListTitle(listId: number, title: string) {
+    // 해당하는 아이디의 리스트 찾기
+    const list = await this.listRepository.findOne({
+      where: { id: listId },
+    });
+
+    // 리스트 없다면 오류
+    if (!list) {
+      throw new NotFoundException('해당 아이디에 해당하는 리스트가 존재하지 않습니다.');
+    }
+
+    // 리스트 이름 수정해서 저장
+    const updatedList = await this.listRepository.save({
+      ...list,
+      title: title,
+    });
+
+    return updatedList;
   }
 }
