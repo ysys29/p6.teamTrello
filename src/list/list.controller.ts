@@ -1,5 +1,6 @@
 import { Body, Controller, Delete, Get, Param, Patch, Post } from '@nestjs/common';
 import { ListService } from './list.service';
+import { ReorderListDto } from './dtos/reorder-list.dto';
 
 @Controller('lists')
 export class ListController {
@@ -23,9 +24,21 @@ export class ListController {
     return await this.listService.updateListTitle(listId, title);
   }
 
+  // 리스트 순서 변경
+  @Patch(':listId/reorder')
+  async reorderList(@Param('listId') listId: number, @Body() reorderListDto: ReorderListDto) {
+    return await this.listService.reorderList(listId, reorderListDto);
+  }
+
   // 리스트 삭제
   @Delete(':listId')
   async deleteList(@Param('listId') listId: number) {
     return await this.listService.deleteList(listId);
+  }
+
+  // 리스트 목록 조회
+  @Get()
+  async getAllLists() {
+    return await this.listService.getAllLists();
   }
 }

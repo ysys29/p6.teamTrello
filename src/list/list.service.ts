@@ -1,10 +1,11 @@
-import { Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { List } from './entities/list.entity';
 import { Repository } from 'typeorm';
 import { LexoRank } from 'lexorank';
 import { Board } from 'src/board/entities/board.entity';
 import { BoardMember } from 'src/board/entities/board-member.entity';
+import { ReorderListDto } from './dtos/reorder-list.dto';
 
 @Injectable()
 export class ListService {
@@ -101,6 +102,53 @@ export class ListService {
     return updatedList;
   }
 
+  // 리스트 순서 변경
+  async reorderList(listId: number, reorderListDto: ReorderListDto) {
+    const { beforeId, afterId } = reorderListDto;
+
+    if (!beforeId && !afterId) {
+      throw new BadRequestException('beforeId와 afterId 둘 중 하나는 입력해 주세요.');
+    }
+
+    // 이동시킬 리스트 찾기
+    const list = await this.listRepository.findOneBy({ id: listId });
+
+    if (!list) {
+      throw new NotFoundException('해당 아이디에 해당하는 리스트가 없습니다.');
+    }
+
+    // 이동 후 이전과 이후에 위치할 리스트 찾기
+    const beforeList = beforeId ? await this.listRepository.findOneBy({ id: beforeId }) : null; // ex) 6번 리스트를 2번과 3번 사이로 이동시킨다면 2번 리스트
+    const afterList = afterId ? await this.listRepository.findOneBy({ id: afterId }) : null; // ex) 6번 리스트를 2번과 3번 사이로 이동시킨다면 3번 리스트
+
+    // beforeId가 있고, beforeList가 없는 경우
+    if ((beforeId && !beforeList) || (afterId && !afterList)) {
+      throw new BadRequestException('리스트가 변경되었으니 다시 호출해 주세요.');
+    }
+
+    // 이전과 이후 리스트의 lexoRank
+    const beforeListLexoRank = beforeList ? LexoRank.parse(beforeList.lexoRank) : null;
+    const afterListLexoRank = afterList ? LexoRank.parse(afterList.lexoRank) : null;
+
+    // 이동할 아이템에 새로 할당할 lexoRank 정의
+    let lexoRank: LexoRank;
+
+    // 첫번째로 이동시켰을 때
+    if (!beforeList) {
+      lexoRank = afterListLexoRank.genPrev();
+    } else if (!afterListLexoRank) {
+      // 마지막으로 이동시켰을 때
+      lexoRank = beforeListLexoRank.genNext();
+    } else {
+      // 리스트와 리스트 사이로 이동시켰을 때
+      lexoRank = beforeListLexoRank.between(afterListLexoRank);
+    }
+
+    await this.listRepository.save({ ...list, lexoRank: lexoRank.toString() });
+
+    return true;
+  }
+
   // 리스트 삭제
   async deleteList(listId: number) {
     const list = await this.listRepository.findOneBy({ id: listId });
@@ -112,5 +160,14 @@ export class ListService {
     await this.listRepository.softDelete({ id: listId });
 
     return true;
+  }
+
+  // 리스트 목록 조회
+  async getAllLists() {
+    const lists = await this.listRepository.find({
+      order: { lexoRank: 'ASC' },
+    });
+
+    return lists;
   }
 }
