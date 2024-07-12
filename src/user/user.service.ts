@@ -54,6 +54,10 @@ export class UserService {
   async softDelete(id: number) {
     const user = await this.findOneById(id);
 
+    if (!user) {
+      throw new BadRequestException('사용자를 찾을 수 없습니다.');
+    }
+
     await this.userRepository.softDelete({ id });
   }
 }
