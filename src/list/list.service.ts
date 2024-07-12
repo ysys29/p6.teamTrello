@@ -7,6 +7,7 @@ import { Board } from 'src/board/entities/board.entity';
 import { BoardMember } from 'src/board/entities/board-member.entity';
 import { ReorderListDto } from './dtos/reorder-list.dto';
 import { ValidateListAccess } from './types/validate-list-access.type';
+import { CreateListDto } from './dtos/creaet-list.dto';
 
 @Injectable()
 export class ListService {
@@ -20,7 +21,9 @@ export class ListService {
   ) {}
 
   // 리스트 생성
-  async createList(userId: number, boardId: number, title: string) {
+  async createList(userId: number, createListDto: CreateListDto) {
+    const { boardId, title } = createListDto;
+
     // 해당 아이디의 보드가 있는지 확인
     const board = await this.boardRepository.findOneBy({ id: boardId });
 
@@ -163,8 +166,6 @@ export class ListService {
       where: { id: listId },
       relations: relationCondition,
     });
-
-    console.log('list', list);
 
     if (!list) {
       throw new NotFoundException('해당 아이디에 해당하는 리스트가 없습니다.');

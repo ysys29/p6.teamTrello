@@ -1,6 +1,7 @@
 import { Body, Controller, Delete, Get, Param, Patch, Post } from '@nestjs/common';
 import { ListService } from './list.service';
 import { ReorderListDto } from './dtos/reorder-list.dto';
+import { CreateListDto } from './dtos/creaet-list.dto';
 
 @Controller('lists')
 export class ListController {
@@ -8,8 +9,8 @@ export class ListController {
 
   // 리스트 생성
   @Post()
-  async createList(@Body('userId') userId: number, @Body('boardId') boardId: number, @Body('title') title: string) {
-    return await this.listService.createList(userId, boardId, title);
+  async createList(@Body('userId') userId: number, @Body() craeteListDto: CreateListDto) {
+    return await this.listService.createList(userId, craeteListDto);
   }
 
   // 리스트 상세 조회
