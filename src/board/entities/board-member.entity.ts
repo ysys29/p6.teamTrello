@@ -1,13 +1,24 @@
 import { User } from 'src/user/entities/user.entity';
-import { CreateDateColumn, Entity, ManyToOne, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
+import {
+  Column,
+  CreateDateColumn,
+  Entity,
+  JoinColumn,
+  ManyToOne,
+  PrimaryGeneratedColumn,
+  UpdateDateColumn,
+} from 'typeorm';
+import { Board } from './board.entity';
 
 @Entity('board_members')
-export class BoardMembers {
-  @PrimaryGeneratedColumn({ unsigned: true })
+export class BoardMember {
+  @PrimaryGeneratedColumn()
   id: number;
 
+  @Column()
   boardId: number;
 
+  @Column()
   userId: number;
 
   @CreateDateColumn()
@@ -15,4 +26,10 @@ export class BoardMembers {
 
   @UpdateDateColumn()
   updatedAt: Date;
+
+  @ManyToOne((type) => User, (user) => user.boardMembers)
+  user: User;
+
+  @ManyToOne((type) => Board, (board) => board.boardMembers)
+  board: Board;
 }
