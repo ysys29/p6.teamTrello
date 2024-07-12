@@ -1,7 +1,15 @@
-import { ConflictException, Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
+import {
+  BadRequestException,
+  ConflictException,
+  ForbiddenException,
+  Injectable,
+  InternalServerErrorException,
+  NotFoundException,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { BoardInvitation } from './entities/invitation.entity';
-import { Repository } from 'typeorm';
+import { DataSource, Repository } from 'typeorm';
 import { SendInvitationDto } from './dtos/send-invitation.dto';
 import { BoardMember } from 'src/board/entities/board-member.entity';
 import { User } from 'src/user/entities/user.entity';
@@ -16,6 +24,7 @@ export class InvitationService {
     private readonly boardMemberRepostitory: Repository<BoardMember>,
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
+    private readonly dataSource: DataSource,
   ) {}
 
   // 초대 보내기
@@ -75,5 +84,50 @@ export class InvitationService {
     });
 
     return invitations;
+  }
+
+  // 내가 받은 초대의 상태 변경
+  async changeInvitationStatus(userId: number, invitationId: number, status: InvitationStatus) {
+    const invitation = await this.boardInvitationRepository.findOneBy({ id: invitationId });
+
+    if (!invitation) {
+      throw new NotFoundException('해당 아이디의 초대를 찾을 수 없습니다.');
+    }
+
+    const user = await this.userRepository.findOneBy({ id: userId });
+
+    if (!user || invitation.email !== user.email) {
+      throw new ForbiddenException('해당 초대의 상태 변경에 대한 권한이 없습니다.');
+    }
+
+    if (invitation.status !== InvitationStatus.INVITED) {
+      throw new BadRequestException('상태가 Invited인 초대만 상태 수정할 수 있습니다.');
+    }
+
+    //여기부터 트랜잭션
+    const queryRunner = this.dataSource.createQueryRunner();
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
+
+    try {
+      // 상태 변경해서 저장
+      invitation.status = status;
+      await queryRunner.manager.save(BoardInvitation, invitation);
+
+      if (status === InvitationStatus.ACCEPTED) {
+        // 보드 멤버에 해당 유저 추가
+        const boardMember = this.boardMemberRepostitory.create({ boardId: invitation.boardId, userId });
+        await queryRunner.manager.save(BoardMember, boardMember);
+      }
+
+      await queryRunner.commitTransaction();
+
+      return true;
+    } catch (error) {
+      await queryRunner.rollbackTransaction();
+      throw new InternalServerErrorException('트랜잭션 오류');
+    } finally {
+      await queryRunner.release();
+    }
   }
 }
