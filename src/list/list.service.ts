@@ -100,4 +100,17 @@ export class ListService {
 
     return updatedList;
   }
+
+  // 리스트 삭제
+  async deleteList(listId: number) {
+    const list = await this.listRepository.findOneBy({ id: listId });
+
+    if (!list) {
+      throw new NotFoundException('해당 아이디에 해당하는 리스트가 없습니다.');
+    }
+
+    await this.listRepository.softDelete({ id: listId });
+
+    return true;
+  }
 }

@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, Patch, Post } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Patch, Post } from '@nestjs/common';
 import { ListService } from './list.service';
 
 @Controller('lists')
@@ -21,5 +21,11 @@ export class ListController {
   @Patch(':listId/title')
   async updateListTitle(@Param('listId') listId: number, @Body('title') title: string) {
     return await this.listService.updateListTitle(listId, title);
+  }
+
+  // 리스트 삭제
+  @Delete(':listId')
+  async deleteList(@Param('listId') listId: number) {
+    return await this.listService.deleteList(listId);
   }
 }
