@@ -1,8 +1,8 @@
-import { IsEnum, ValidateIf } from 'class-validator';
+import { IsEnum, IsNotEmpty } from 'class-validator';
 import { InvitationStatus } from '../types/invitation-status.type';
 
 export class UpdateInvitationStatusDto {
-  @ValidateIf((_) => _.status !== InvitationStatus.INVITED)
-  @IsEnum(InvitationStatus, { message: '입력 가능한 스테이터스는 ACCEPTED와 DECLINED입니다.' })
+  @IsNotEmpty({ message: '변경할 상태를 입력해 주세요.' })
+  @IsEnum(InvitationStatus, { message: '유효하지 않은 변경 상태입니다.' })
   status: InvitationStatus;
 }

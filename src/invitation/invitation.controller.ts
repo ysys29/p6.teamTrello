@@ -28,7 +28,7 @@ export class InvitationController {
   async changeInvitationStatus(
     @Request() req,
     @Param('invitationId') invitationId: number,
-    @Body('status') updateStatusDto: UpdateInvitationStatusDto,
+    @Body() updateStatusDto: UpdateInvitationStatusDto,
   ) {
     return this.invitationService.changeInvitationStatus(req.user.id, invitationId, updateStatusDto);
   }

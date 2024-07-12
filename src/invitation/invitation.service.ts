@@ -90,6 +90,11 @@ export class InvitationService {
   // 내가 받은 초대의 상태 변경
   async changeInvitationStatus(userId: number, invitationId: number, updateStatusDto: UpdateInvitationStatusDto) {
     const { status } = updateStatusDto;
+
+    if (status === InvitationStatus.INVITED) {
+      throw new BadRequestException('유효하지 않은 변경 상태입니다.');
+    }
+
     const invitation = await this.boardInvitationRepository.findOneBy({ id: invitationId });
 
     if (!invitation) {
