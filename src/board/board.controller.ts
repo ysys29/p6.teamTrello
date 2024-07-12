@@ -3,12 +3,12 @@ import { BoardService } from './board.service';
 import { CreateBoardDto } from './dtos/create-board.dto';
 import { UpdateBoardDto } from './dtos/update-board.dto';
 
-@Controller('board')
+@Controller('boards')
 export class BoardController {
   constructor(private readonly boardService: BoardService) {}
 
   @Post()
-  create(@Body() createBoardDto: CreateBoardDto) {
+  async create(@Body() createBoardDto: CreateBoardDto) {
     return this.boardService.create(createBoardDto);
   }
 
