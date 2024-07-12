@@ -6,6 +6,7 @@ import { LexoRank } from 'lexorank';
 import { Board } from 'src/board/entities/board.entity';
 import { BoardMember } from 'src/board/entities/board-member.entity';
 import { ReorderListDto } from './dtos/reorder-list.dto';
+import { ValidateListAccess } from './types/validate-list-access.type';
 
 @Injectable()
 export class ListService {
@@ -67,7 +68,7 @@ export class ListService {
   // 리스트 상세 조회
   async getList(userId: number, listId: number) {
     // 리스트 접근 권한 체크
-    const list = await this.validateListAccess(userId, listId);
+    const list = await this.validateListAccess({ userId, listId, relation: true });
 
     //카드를 lexoRank를 기준으로 정렬(asc로)
     list.cards.sort((a, b) => a.lexoRank.localeCompare(b.lexoRank)); //localCompare: 문자열과 문자열을 비교
@@ -78,7 +79,7 @@ export class ListService {
   // 리스트 이름 수정
   async updateListTitle(userId: number, listId: number, title: string) {
     // 리스트 접근 권한 체크
-    const list = await this.validateListAccess(userId, listId);
+    const list = await this.validateListAccess({ userId, listId });
 
     // 리스트 이름 수정해서 저장
     const updatedList = await this.listRepository.save({
@@ -98,7 +99,7 @@ export class ListService {
     }
 
     // 리스트 접근 권한 체크
-    const list = await this.validateListAccess(userId, listId);
+    const list = await this.validateListAccess({ userId, listId });
 
     // 이동 후 이전과 이후에 위치할 리스트 찾기
     const beforeList = beforeId ? await this.listRepository.findOneBy({ id: beforeId }) : null; // ex) 6번 리스트를 2번과 3번 사이로 이동시킨다면 2번 리스트
@@ -135,7 +136,7 @@ export class ListService {
   // 리스트 삭제
   async deleteList(userId: number, listId: number) {
     // 리스트 접근 권한 체크
-    const list = await this.validateListAccess(userId, listId);
+    const list = await this.validateListAccess({ userId, listId });
 
     await this.listRepository.softDelete({ id: listId });
 
@@ -153,11 +154,17 @@ export class ListService {
   }
 
   // 리스트 접근 권한 체크
-  async validateListAccess(userId: number, listId: number) {
+  async validateListAccess(validateListAccess: ValidateListAccess) {
+    const { userId, listId, relation } = validateListAccess;
+
+    const relationCondition = relation ? ['cards', 'board'] : ['board'];
+
     const list = await this.listRepository.findOne({
       where: { id: listId },
-      relations: ['cards', 'board'],
+      relations: relationCondition,
     });
+
+    console.log('list', list);
 
     if (!list) {
       throw new NotFoundException('해당 아이디에 해당하는 리스트가 없습니다.');
