@@ -24,8 +24,8 @@ export class AuthService {
       throw new BadRequestException('비밀번호와 비밀번호 확인이 서로 일치하지 않습니다.');
     }
 
-    // 해당 email로 가입한 사용자가 없는 지
-    const existedUser = await this.userRepository.findOneBy({ email });
+    // 해당 email로 가입한 사용자가 없는 지 withDeleted로 soft delete한 사용자도 찾기. (기본적으로 안 찾음)
+    const existedUser = await this.userRepository.findOne({ where: { email }, withDeleted: true });
     if (existedUser) {
       throw new BadRequestException(`이미 가입 된 이메일 입니다.`);
     }
@@ -53,11 +53,11 @@ export class AuthService {
     return { accessToken };
   }
 
-  // 일단 아이디만 넘기는 중
+  // deletedAt도 넘김
   async validateUser({ email, password }: SignInDto) {
     const user = await this.userRepository.findOne({
       where: { email },
-      select: { id: true, password: true },
+      select: { id: true, password: true, deletedAt: true },
     });
 
     const isPasswordMatched = bcrypt.compareSync(password, user?.password ?? '');

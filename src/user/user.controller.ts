@@ -1,28 +1,84 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Request,
+  UseGuards,
+  HttpStatus,
+  Delete,
+  Patch,
+  Body,
+  BadRequestException,
+} from '@nestjs/common';
 import { UserService } from './user.service';
+import { AuthGuard } from '@nestjs/passport';
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { UpdateUserDto } from './dtos/update-user.dto';
 
-@Controller('user')
+@ApiTags('사용자')
+@Controller('users')
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.userService.findOne(+id);
-  }
+  // @Get('/:id')
+  // findOneById(@Param('id') id: string) {
+  //   return this.userService.findOneById(+id);
+  // }
 
+  /**
+   * 내정보조회
+   * @param req
+   * @returns
+   */
+  @ApiBearerAuth()
+  @UseGuards(AuthGuard('jwt'))
   @Get('/me')
-  findAll() {
-    return this.userService.findAll();
+  async findOne(@Request() req) {
+    const data = await this.userService.findOneById(req.user.id);
+
+    return {
+      statusCode: HttpStatus.OK,
+      message: `내 정보 조회에 성공했습니다.`,
+      data,
+    };
   }
 
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
-    return this.userService.update(+id, updateUserDto);
+  /**
+   * 내정보수정
+   * @param req
+   * @param updateUserDto
+   * @returns
+   */
+  @ApiBearerAuth()
+  @UseGuards(AuthGuard('jwt'))
+  @Patch('/me')
+  async update(@Request() req, @Body() updateUserDto: UpdateUserDto) {
+    if (!updateUserDto) {
+      throw new BadRequestException('수정할 내용을 입력해 주세요.');
+    }
+
+    const data = await this.userService.update(req.user.id, updateUserDto);
+
+    return {
+      statusCode: HttpStatus.OK,
+      message: `내 정보 수정에 성공했습니다.`,
+      data: data,
+    };
   }
 
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.userService.remove(+id);
+  /**
+   * 회원탈퇴
+   * @param req
+   * @returns
+   */
+  @ApiBearerAuth()
+  @UseGuards(AuthGuard('jwt'))
+  @Delete('/me')
+  async remove(@Request() req) {
+    this.userService.softDelete(req.user.id);
+
+    return {
+      statusCode: HttpStatus.OK,
+      message: `회원 탈퇴에 성공했습니다.`,
+    };
   }
 }
