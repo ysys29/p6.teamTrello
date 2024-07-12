@@ -8,21 +8,18 @@ import {
   Patch,
   Body,
   BadRequestException,
+  Param,
 } from '@nestjs/common';
 import { UserService } from './user.service';
 import { AuthGuard } from '@nestjs/passport';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { UpdateUserDto } from './dtos/update-user.dto';
+import { SearchUserParamsDto } from './dtos/search-user.dto';
 
 @ApiTags('사용자')
 @Controller('users')
 export class UserController {
   constructor(private readonly userService: UserService) {}
-
-  // @Get('/:id')
-  // findOneById(@Param('id') id: string) {
-  //   return this.userService.findOneById(+id);
-  // }
 
   /**
    * 내정보조회
@@ -79,6 +76,24 @@ export class UserController {
     return {
       statusCode: HttpStatus.OK,
       message: `회원 탈퇴에 성공했습니다.`,
+    };
+  }
+
+  /**
+   * 사용자조회
+   * @param userId
+   * @returns
+   */
+  @ApiBearerAuth()
+  @UseGuards(AuthGuard('jwt'))
+  @Get(':userId')
+  async findOneById(@Param() userId: SearchUserParamsDto) {
+    const data = await this.userService.findOneById(userId.userId);
+
+    return {
+      statusCode: HttpStatus.OK,
+      message: `사용자 조회에 성공했습니다.`,
+      data,
     };
   }
 }
