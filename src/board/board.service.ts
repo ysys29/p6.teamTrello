@@ -4,12 +4,15 @@ import { UpdateBoardDto } from './dtos/update-board.dto';
 import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Board } from './entities/board.entity';
+import { BoardMember } from './entities/board-member.entity';
 
 @Injectable()
 export class BoardService {
   constructor(
     @InjectRepository(Board)
     private readonly boardRepository: Repository<Board>,
+    @InjectRepository(BoardMember)
+    private readonly boardMemberRepository: Repository<BoardMember>,
   ) {}
 
   // 보드 생성
@@ -26,7 +29,7 @@ export class BoardService {
   }
 
   // 보드 상세 조회
-  async findOne(id: number): Promise<Board> {
+  async findOne(id: number, userId: number): Promise<Board> {
     // 주어진 ID로 보드 객체를 조회
     const board = await this.boardRepository.findOne({
       where: { id },
@@ -37,6 +40,15 @@ export class BoardService {
     // 보드가 존재하지 않으면 에러 메시지 출력
     if (!board) {
       throw new NotFoundException(`존재하지 않는 보드입니다.`);
+    }
+
+    // 사용자가 보드 멤버인지 확인
+    const isMember = await this.boardMemberRepository.findOne({
+      where: { boardId: id, userId },
+    });
+
+    if (!isMember) {
+      throw new UnauthorizedException('해당 보드에 접근할 권한이 없습니다.');
     }
 
     return board;
@@ -78,5 +90,22 @@ export class BoardService {
     }
 
     await this.boardRepository.remove(board);
+  }
+
+  // 보드 멤버 조회
+  async getBoardMembers(boardId: number, userId: number): Promise<BoardMember[]> {
+    // 사용자가 보드 멤버인지 확인
+    const isMember = await this.boardMemberRepository.findOne({
+      where: { boardId, userId },
+    });
+
+    if (!isMember) {
+      throw new UnauthorizedException('해당 보드에 접근할 권한이 없습니다.');
+    }
+
+    return this.boardMemberRepository.find({
+      where: { boardId },
+      relations: ['user'],
+    });
   }
 }

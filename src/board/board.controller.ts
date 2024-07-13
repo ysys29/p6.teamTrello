@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Request } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Patch, Post, Request, UseGuards } from '@nestjs/common';
 import { BoardService } from './board.service';
 import { CreateBoardDto } from './dtos/create-board.dto';
 import { UpdateBoardDto } from './dtos/update-board.dto';
@@ -28,14 +28,15 @@ export class BoardController {
 
   @ApiBearerAuth()
   @UseGuards(AuthGuard('jwt'))
-  @Get(':id') // URL주소에 전달된 ID를 사용하여 해당 보드를 조회
-  async findOne(@Param('id') id: number): Promise<Board> {
-    return this.boardService.findOne(id);
+  @Get(':id') // URL 주소에 전달된 ID를 사용하여 해당 보드를 조회
+  async findOne(@Param('id') id: number, @Request() req): Promise<Board> {
+    const userId = req.user.id; // JWT 토큰에서 사용자 ID 추출
+    return this.boardService.findOne(id, userId);
   }
 
   @ApiBearerAuth()
   @UseGuards(AuthGuard('jwt'))
-  @Patch(':id') // URL주소에 전달된 ID를 사용하여 해당 보드를 수정
+  @Patch(':id') // URL 주소에 전달된 ID를 사용하여 해당 보드를 수정
   async update(@Param('id') id: string, @Body() updateBoardDto: UpdateBoardDto, @Request() req) {
     const userId = req.user.id; // JWT 토큰에서 사용자 ID 추출
     return this.boardService.update(Number(id), updateBoardDto, userId);
@@ -47,5 +48,13 @@ export class BoardController {
   async remove(@Param('id') id: string, @Request() req) {
     const userId = req.user.id; // JWT 토큰에서 사용자 ID 추출
     return this.boardService.remove(Number(id), userId);
+  }
+
+  @ApiBearerAuth()
+  @UseGuards(AuthGuard('jwt'))
+  @Get(':boardId/members') // URL 주소에 전달된 보드 ID를 사용하여 보드 멤버 조회
+  async getBoardMembers(@Param('boardId') boardId: number, @Request() req) {
+    const userId = req.user.id; // JWT 토큰에서 사용자 ID 추출
+    return this.boardService.getBoardMembers(boardId, userId);
   }
 }
