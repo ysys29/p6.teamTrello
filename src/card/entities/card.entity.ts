@@ -51,7 +51,7 @@ export class Card {
   @Column()
   color: string;
 
-  @Column({ nullable: true, select: false })
+  @Column()
   lexoRank: string;
 
   @Column({ nullable: true })
