@@ -20,7 +20,15 @@ export class BoardService {
     // DTO를 사용하여 새 보드 객체 생성
     const board = this.boardRepository.create({ ...createBoardDto, ownerId: userId });
     // 생성된 보드 객체를 데이터베이스에 저장
-    return this.boardRepository.save(board);
+    const savedBoard = await this.boardRepository.save(board);
+    // 보드 생성자를 보드 멤버로 추가
+    const boardMember = this.boardMemberRepository.create({
+      boardId: savedBoard.id,
+      userId: userId,
+    });
+    await this.boardMemberRepository.save(boardMember);
+
+    return savedBoard;
   }
 
   // 보드 목록 검색 추가 구현 사항, 일단은
