@@ -6,9 +6,13 @@ import { Card } from './entities/card.entity';
 import { Repository } from 'typeorm';
 import { ReorderCardDto } from './dto/reorder-card.dto';
 import { LexoRank } from 'lexorank';
+import { List } from 'src/list/entities/list.entity';
 @Injectable()
 export class CardService {
-  @InjectRepository(Card) private readonly cardRepository: Repository<Card>;
+  constructor(
+    @InjectRepository(Card) private readonly cardRepository: Repository<Card>,
+    @InjectRepository(List) private readonly listRepository: Repository<List>,
+  ) {}
 
   async create(createCardDto: CreateCardDto) {
     const { listId, title, content, color } = createCardDto;
@@ -94,54 +98,58 @@ export class CardService {
 
   // 카드 순서 변경
   async reorderCard(cardId: number, reorderCardDto: ReorderCardDto) {
+    // 유효성 검사
     const { beforeId, afterId, ListId } = reorderCardDto;
-    // 만약 2개 중 하나라도 있어야된다.
+    // 1. beforeId, afterId 중 최소 1개는 있어야 한다. 둘 다 없다면 false 반환
     // beforecard가 Null 이라면 첫번재 순서
     // aftercard가 Null 이라면 마지막 순서
     if (!beforeId && !afterId) throw new NotFoundException('beforeId, afterId 중 1개를 입력해주세요');
 
-    //해당 리스트가 없을때 False 반환
+    // 2. 해당 리스트가 없을때 false 반환
+    const existedList = await this.listRepository.findOneBy({ id: ListId });
+    if (!existedList) throw new NotFoundException('해당 리스트가 없습니다.');
 
-    // 이동 후 이전과 이후에 위치할 카드 찾기
+    // Id값으로 이동 했을때 전과 후의 카드 찾기
     const beforeCard = beforeId ? await this.cardRepository.findOneBy({ id: beforeId }) : null; // ex) 6번 리스트를 2번과 3번 사이로 이동시킨다면 2번 리스트
     const afterCard = afterId ? await this.cardRepository.findOneBy({ id: afterId }) : null; // ex) 6번 리스트를 2번과 3번 사이로 이동시킨다면 3번 리스트
 
-    // 해당 리스트 안에, 해당 카드가 없다면 false 반환
+    // 3, 해당 리스트 안에, 해당 카드가 없다면 false 반환
     // beforeId 혹은 afterId가 Null값을 줄 수 있는 경우를 제외해야한다.
+    // 의도적으로 Null값을 줄 수는 있지만, 리스트 id에 맞게 찾았을때 카드가 null값이 나오면 안된다.
     if (afterId != null || beforeId != null) {
       const existedBeforeCard = await this.cardRepository.findOneBy({ id: beforeId, listId: ListId });
       const existedAfterCard = await this.cardRepository.findOneBy({ id: afterId, listId: ListId });
       if (!existedBeforeCard || !existedAfterCard) throw new NotFoundException('해당 리스트에 해당 카드가 없습니다.');
     }
 
-    //만약 두 카드의 리스트 아이디가 다르다면 false 반환
-    if (beforeCard.listId !== afterCard.listId) throw new NotFoundException('두 카드의 리스트 아이디가 다릅니다.');
+    // 만약 두 카드의 리스트 아이디가 다르다면 false 반환
+    // 근데 위의 조건은 3번에 의해 에러가 날것이다. 3번 조건에 의해 처리될것이니 필요없다고 생각.
+    //if (beforeCard.listId !== afterCard.listId) throw new NotFoundException('두 카드의 리스트 아이디가 다릅니다.');
 
     // 이전과 이후 카드의 lexoRank 값
     const beforeCardLexoRank = beforeCard ? LexoRank.parse(beforeCard.lexoRank) : null;
     const afterCardLexoRank = afterCard ? LexoRank.parse(afterCard.lexoRank) : null;
-    console.log(beforeCardLexoRank);
-    console.log(afterCardLexoRank);
-    console.log('zzz');
+    // 4. lexoRank값은 전 > 후. 하지만 전 < 후가 된다면?
+    // 근데 웹사이트에서는 카드를 옮기면 알아서 전과 후가 정해지는 것 같다. 왜지?
+    // 유효성 검사 끝
+
+    // 카드 변경 로직
     // 이동할 아이템에 새로 할당할 lexoRank 정의
     let lexoRank: LexoRank;
-    // 2번의
 
-    // 이동할 위치
+    // 이동할 위치에 따른 LexoRank값 할당
     // 1. 맨 처음-> 첫번째 위치한 카드의 LexoRank값에서 genPrev()를 이용해 더 작은 LexoRank값을 할당
-    if (!beforeCard) lexoRank = afterCardLexoRank.genPrev();
+    if (!beforeCard) lexoRank = afterCardLexoRank.genNext();
     // 2. 맨 끝  -> 마지막에 위치한 카드의 LexoRank값에서 genNext()를 이용해 더 큰 LexoRank값을 할당
-    else if (!afterCard) lexoRank = beforeCardLexoRank.genNext();
+    else if (!afterCard) lexoRank = beforeCardLexoRank.genPrev();
     // 3. 두 카드 사이 ->  between()을 이용해서 두 카드의 LexoRank값들의 사이값인 LexoRank값을 할당
     else lexoRank = beforeCardLexoRank.between(afterCardLexoRank);
-    console.log('zzzzzzzzzzzzzzzzzzz');
-    console.log(lexoRank);
-    //await this.cardRepository.save({ lexoRank: lexoRank.toString() });
-    const data = await this.cardRepository.update(cardId, {
+
+    // 선택한 리스트와 변경된 lexoRank값 update하기
+    await this.cardRepository.update(cardId, {
       listId: ListId,
       lexoRank: lexoRank.toString(),
     });
-    await this.findAll();
-    return true;
+    return await this.findAll();
   }
 }

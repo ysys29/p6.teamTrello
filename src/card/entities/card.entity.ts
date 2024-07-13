@@ -66,14 +66,13 @@ export class Card {
   @DeleteDateColumn()
   deletedAt: Date;
 
-  @ManyToOne((type) => List, (list) => list.cards)
-  // 꼭 해야하는지?
+  @ManyToOne(() => List, (list) => list.cards)
   @JoinColumn({ name: 'listId' })
   list: List;
 
-  @OneToMany((type) => CardMember, (cardmember) => cardmember.card)
+  @OneToMany(() => CardMember, (cardmember) => cardmember.card)
   cardMembers: CardMember[];
 
-  @OneToMany((type) => Comment, (comment) => comment.card)
+  @OneToMany(() => Comment, (comment) => comment.card)
   comments: Comment[];
 }

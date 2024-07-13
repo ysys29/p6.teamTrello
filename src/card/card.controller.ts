@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Request, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards } from '@nestjs/common';
 import { CardService } from './card.service';
 import { CreateCardDto } from './dto/create-card.dto';
 import { UpdateCardDto } from './dto/update-card.dto';
@@ -15,8 +15,8 @@ export class CardController {
    * @param createCardDto
    * @returns
    */
-  //@ApiBearerAuth()
-  //@UseGuards(AuthGuard('jwt'))
+  @ApiBearerAuth()
+  @UseGuards(AuthGuard('jwt'))
   @Post()
   async create(@Body() createCardDto: CreateCardDto) {
     const data = await this.cardService.create(createCardDto);
@@ -31,6 +31,8 @@ export class CardController {
    * @returns
    */
 
+  @ApiBearerAuth()
+  @UseGuards(AuthGuard('jwt'))
   @Get()
   async findAll() {
     const data = await this.cardService.findAll();
@@ -100,8 +102,8 @@ export class CardController {
    * @returns
    */
   // 카드 순서 변경
-  //@ApiBearerAuth()
-  //@UseGuards(AuthGuard('jwt'))
+  @ApiBearerAuth()
+  @UseGuards(AuthGuard('jwt'))
   @Patch(':cardId/reorder')
   async reorderCard(@Param('cardId') cardId: number, @Body() reorderCardDto: ReorderCardDto) {
     return await this.cardService.reorderCard(cardId, reorderCardDto);
