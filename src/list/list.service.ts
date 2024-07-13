@@ -7,7 +7,7 @@ import { Board } from 'src/board/entities/board.entity';
 import { BoardMember } from 'src/board/entities/board-member.entity';
 import { ReorderListDto } from './dtos/reorder-list.dto';
 import { ValidateListAccess } from './types/validate-list-access.type';
-import { CreateListDto } from './dtos/creaet-list.dto';
+import { CreateListDto } from './dtos/create-list.dto';
 
 @Injectable()
 export class ListService {

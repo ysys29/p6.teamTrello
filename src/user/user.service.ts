@@ -19,12 +19,23 @@ export class UserService {
       where: { id: userId },
       relations: ['boardMembers'],
     });
-
-    if (!user || user.deletedAt !== null) {
+    if (!user) {
       throw new NotFoundException('사용자를 찾을 수 없습니다.');
     }
 
-    return user;
+    const response = {
+      id: user.id,
+      email: user.email,
+      nickname: user.nickname,
+      imgUrl: user.imgUrl,
+      deletedAt: user.deletedAt,
+      boardMembers: user.boardMembers.map((boardMember) => ({
+        id: boardMember.id,
+        boardId: boardMember.boardId,
+      })),
+    };
+
+    return response;
   }
 
   async update(id: number, updateUserDto: UpdateUserDto) {
@@ -53,6 +64,10 @@ export class UserService {
   // 회원 탈퇴하기
   async softDelete(id: number) {
     const user = await this.findOneById(id);
+
+    if (!user) {
+      throw new BadRequestException('사용자를 찾을 수 없습니다.');
+    }
 
     await this.userRepository.softDelete({ id });
   }

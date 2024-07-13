@@ -1,6 +1,6 @@
 import { Column, CreateDateColumn, Entity, ManyToOne, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
 import { InvitationStatus } from '../types/invitation-status.type';
-import { Board } from './board.entity';
+import { Board } from '../../board/entities/board.entity';
 
 @Entity('board_invitations')
 export class BoardInvitation {
@@ -11,7 +11,7 @@ export class BoardInvitation {
   boardId: number;
 
   @Column()
-  userEmail: string;
+  email: string;
 
   @Column({ type: 'enum', enum: InvitationStatus, default: InvitationStatus.INVITED })
   status: InvitationStatus;

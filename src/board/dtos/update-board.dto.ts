@@ -1,4 +1,15 @@
-import { PartialType } from '@nestjs/swagger';
-import { CreateBoardDto } from './create-board.dto';
+import { IsOptional, IsString, IsHexColor } from 'class-validator';
 
-export class UpdateBoardDto extends PartialType(CreateBoardDto) {}
+export class UpdateBoardDto {
+  @IsOptional()
+  @IsString()
+  title?: string;
+
+  @IsOptional()
+  @IsString()
+  description?: string;
+
+  @IsOptional()
+  @IsHexColor()
+  color?: string;
+}
