@@ -1,4 +1,4 @@
-import { IsNotEmpty, IsString } from 'class-validator';
+import { IsNotEmpty, IsString, IsHexColor } from 'class-validator';
 import { User } from 'src/user/entities/user.entity';
 import {
   Column,
@@ -31,6 +31,7 @@ export class Board {
   @Column({ nullable: false })
   description: string;
 
+  @IsHexColor({ message: '유효한 색상 타입이 아닙니다' })
   @Column({ nullable: true, default: '#FFFFFF' })
   color: string;
 

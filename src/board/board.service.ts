@@ -31,11 +31,6 @@ export class BoardService {
     return savedBoard;
   }
 
-  // 보드 목록 검색 추가 구현 사항, 일단은
-  findAll() {
-    return `This action returns all board`;
-  }
-
   // 보드 상세 조회
   async findOne(id: number, userId: number): Promise<Board> {
     // 주어진 ID로 보드 객체를 조회
@@ -115,5 +110,15 @@ export class BoardService {
       where: { boardId },
       relations: ['user'],
     });
+  }
+
+  // 사용자가 속한 보드 조회
+  async getUserBoards(userId: number): Promise<Board[]> {
+    const boardMembers = await this.boardMemberRepository.find({
+      where: { userId },
+      relations: ['board'],
+    });
+
+    return boardMembers.map((member) => member.board);
   }
 }

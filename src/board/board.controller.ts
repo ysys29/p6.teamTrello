@@ -18,13 +18,6 @@ export class BoardController {
     const userId = req.user.id; // JWT 토큰에서 사용자 ID 추출
     return this.boardService.create(createBoardDto, userId);
   }
-  // 보드에 멤버가 추가되면 추후에 작성 예정
-  @ApiBearerAuth()
-  @UseGuards(AuthGuard('jwt'))
-  @Get()
-  findAll() {
-    return this.boardService.findAll();
-  }
 
   @ApiBearerAuth()
   @UseGuards(AuthGuard('jwt'))
@@ -56,5 +49,13 @@ export class BoardController {
   async getBoardMembers(@Param('boardId') boardId: number, @Request() req) {
     const userId = req.user.id; // JWT 토큰에서 사용자 ID 추출
     return this.boardService.getBoardMembers(boardId, userId);
+  }
+
+  @ApiBearerAuth()
+  @UseGuards(AuthGuard('jwt'))
+  @Get('user/boards') // 사용자가 속한 보드들을 조회
+  async getUserBoards(@Request() req): Promise<Board[]> {
+    const userId = req.user.id; // JWT 토큰에서 사용자 ID 추출
+    return this.boardService.getUserBoards(userId);
   }
 }
