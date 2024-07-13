@@ -11,4 +11,7 @@ export const configValidationSchema = Joi.object({
 
   PASSWORD_HASH_ROUNDS: Joi.number().required().default(10),
   JWT_SECRET: Joi.string().required(),
+
+  NODE_MAILER_ID: Joi.string().required(),
+  NODE_MAILER_PASSWORD: Joi.string().required(),
 });

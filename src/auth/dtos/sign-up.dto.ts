@@ -1,6 +1,7 @@
 import { PickType } from '@nestjs/swagger';
-import { IsNotEmpty, IsStrongPassword } from 'class-validator';
+import { IsNotEmpty, IsString, IsStrongPassword } from 'class-validator';
 import { User } from 'src/user/entities/user.entity';
+import { Column } from 'typeorm';
 
 export class SignUpDto extends PickType(User, ['email', 'password', 'nickname', 'imgUrl']) {
   /**
@@ -15,4 +16,9 @@ export class SignUpDto extends PickType(User, ['email', 'password', 'nickname', 
     },
   )
   passwordConfirm: string;
+
+  @IsNotEmpty({ message: `토큰을 입력해 주세요.` })
+  @IsString({ message: `토큰 형식에 맞지 않습니다.` })
+  @Column()
+  token: string;
 }
