@@ -12,7 +12,4 @@ export class CreateBoardDto {
   @IsOptional()
   @IsHexColor({ message: '올바른 색상 코드를 입력해 주세오' })
   color?: string;
-
-  @IsNotEmpty({ message: '보드 생성자 아이디를 입력해 주세요.' })
-  ownerId: number;
 }
