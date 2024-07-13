@@ -8,10 +8,12 @@ import {
   ManyToOne,
   OneToMany,
   PrimaryGeneratedColumn,
+  Unique,
   UpdateDateColumn,
 } from 'typeorm';
 
 @Entity()
+@Unique(['boardId', 'lexoRank'])
 export class List {
   @PrimaryGeneratedColumn()
   id: number;

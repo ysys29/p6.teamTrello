@@ -1,7 +1,7 @@
 import { Body, Controller, Delete, Get, Param, Patch, Post, Request, UseGuards } from '@nestjs/common';
 import { ListService } from './list.service';
 import { ReorderListDto } from './dtos/reorder-list.dto';
-import { CreateListDto } from './dtos/creaet-list.dto';
+import { CreateListDto } from './dtos/create-list.dto';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { AuthGuard } from '@nestjs/passport';
 
