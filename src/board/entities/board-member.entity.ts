@@ -21,10 +21,8 @@ export class BoardMember {
   updatedAt: Date;
 
   @ManyToOne((type) => User, (user) => user.boardMembers)
-  @JoinColumn({ name: 'user_id' })
   user: User;
 
   @ManyToOne((type) => Board, (board) => board.boardMembers)
-  @JoinColumn({ name: 'board_id' })
   board: Board;
 }

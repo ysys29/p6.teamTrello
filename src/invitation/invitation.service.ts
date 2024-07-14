@@ -22,7 +22,7 @@ export class InvitationService {
     @InjectRepository(BoardInvitation)
     private readonly boardInvitationRepository: Repository<BoardInvitation>,
     @InjectRepository(BoardMember)
-    private readonly boardMemberRepostitory: Repository<BoardMember>,
+    private readonly boardMemberRepository: Repository<BoardMember>,
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
     private readonly dataSource: DataSource,
@@ -32,7 +32,7 @@ export class InvitationService {
   async sendInvitation(userId: number, sendInvitationDto: SendInvitationDto) {
     const { boardId, email } = sendInvitationDto;
 
-    const isAvailableMember = await this.boardMemberRepostitory.findOne({
+    const isAvailableMember = await this.boardMemberRepository.findOne({
       where: { boardId, userId },
     });
 
@@ -48,7 +48,7 @@ export class InvitationService {
     }
 
     // 이미 보드에 존재하는 멤버면 에러
-    const existingUser = await this.boardMemberRepostitory.findOne({
+    const existingUser = await this.boardMemberRepository.findOne({
       where: { boardId, userId: user.id },
     });
 
@@ -123,7 +123,7 @@ export class InvitationService {
 
       if (status === InvitationStatus.ACCEPTED) {
         // 보드 멤버에 해당 유저 추가
-        const boardMember = this.boardMemberRepostitory.create({ boardId: invitation.boardId, userId });
+        const boardMember = this.boardMemberRepository.create({ boardId: invitation.boardId, userId });
         await queryRunner.manager.save(BoardMember, boardMember);
       }
 
