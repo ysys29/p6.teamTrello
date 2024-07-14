@@ -8,6 +8,11 @@ export class CardMember {
   @PrimaryGeneratedColumn()
   id: number;
 
+  /**
+   * 유저 아이디
+   * @example "1"
+   */
+  @IsNotEmpty({ message: `cardId 입력해주세요` })
   @Column()
   cardId: number;
 
