@@ -1,12 +1,13 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Email } from './entities/email.entity';
-import { Repository } from 'typeorm';
+import { LessThan, Repository } from 'typeorm';
 import nodeMailer from 'nodemailer';
 import { SendEmailDto } from './dtos/send-email.dto';
 import { JwtService } from '@nestjs/jwt';
 import { InjectRepository } from '@nestjs/typeorm';
 import { SaveEmailDto } from './dtos/save-email.dto';
+import { Cron } from '@nestjs/schedule';
 
 @Injectable()
 export class EmailService {
@@ -108,5 +109,24 @@ export class EmailService {
     }
 
     return isExistedEmail;
+  }
+
+  async deleteOldEmails() {
+    // DB 시간 가져오기
+    const result = await this.emailRepository.query('SELECT NOW() as currentTime');
+    const dbTime = new Date(result[0].currentTime);
+    const fiveMinutesAgo = new Date(dbTime.getTime() - 5 * 60 * 1000);
+
+    const deletedEmails = await this.emailRepository.delete({
+      createdAt: LessThan(fiveMinutesAgo),
+    });
+    console.log('🚀 ~ EmailService ~ deleteOldEmails:', fiveMinutesAgo, ' 이전 이메일 삭제', deletedEmails.affected);
+  }
+
+  // 1분마다 실행. 정확히는 0초일때마다 실행
+  @Cron('0 * * * * *')
+  async handleCron() {
+    console.log('🚀deleteOldEmails 실행 시간', new Date(Date.now()));
+    await this.deleteOldEmails();
   }
 }

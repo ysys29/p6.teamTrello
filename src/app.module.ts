@@ -12,6 +12,7 @@ import { CardModule } from './card/card.module';
 import { CommentModule } from './comment/comment.module';
 import { InvitationModule } from './invitation/invitation.module';
 import { EmailModule } from './email/email.module';
+import { ScheduleModule } from '@nestjs/schedule';
 
 @Module({
   imports: [
@@ -28,6 +29,7 @@ import { EmailModule } from './email/email.module';
     CommentModule,
     InvitationModule,
     EmailModule,
+    ScheduleModule.forRoot(),
   ],
   controllers: [AppController],
 })
