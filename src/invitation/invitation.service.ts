@@ -42,6 +42,20 @@ export class InvitationService {
       throw new UnauthorizedException('초대 권한이 없습니다.');
     }
 
+    // 해당 이메일의 유저가 존재하는지 찾기
+    const user = await this.userRepository.findOneBy({ email });
+
+    if (user) {
+      // 회원가입 되어있고, 이미 보드에 존재하는 멤버면 에러
+      const existingUser = await this.boardMemberRepository.findOne({
+        where: { boardId, userId: user.id },
+      });
+
+      if (existingUser) {
+        throw new ConflictException('이미 보드에 존재하는 멤버입니다.');
+      }
+    }
+
     // 이미 초대해서, invited 상태인 유저면 에러
     const existingInvitation = await this.boardInvitationRepository.findOne({
       where: { boardId, email, status: InvitationStatus.INVITED },
@@ -51,21 +65,9 @@ export class InvitationService {
       throw new ConflictException('이미 초대한 멤버입니다. 수락을 기다려 주세요.');
     }
 
-    // 해당 이메일의 유저가 존재하는지 찾기
-    const user = await this.userRepository.findOneBy({ email });
-
+    // 초대 기록이 없고, 가입하지 않은 유저라면 메일 보내기
     if (!user) {
-      // throw new NotFoundException('해당하는 이메일의 유저가 존재하지 않습니다.');
       this.mailService.sendMail({ email, boardId });
-    } else {
-      // 이미 보드에 존재하는 멤버면 에러
-      const existingUser = await this.boardMemberRepository.findOne({
-        where: { boardId, userId: user.id },
-      });
-
-      if (existingUser) {
-        throw new ConflictException('이미 보드에 존재하는 멤버입니다.');
-      }
     }
 
     // 초대 저장하기
