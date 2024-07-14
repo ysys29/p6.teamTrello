@@ -32,20 +32,18 @@ export class BoardService {
   }
 
   // 보드 상세 조회
-  async findOne(id: number, userId: number): Promise<Board> {
-    // 주어진 ID로 보드 객체를 조회
+  async findOne(id: number, userId: number): Promise<any> {
+    // 반환 타입을 any로 변경
     const board = await this.boardRepository.findOne({
       where: { id },
-      relations: ['user', 'boardMembers', 'lists'],
-      // 보드 멤버들과 리스트들도 받아옴
+      relations: ['boardMembers', 'lists'],
+      select: ['id', 'title', 'description', 'color', 'createdAt', 'updatedAt'],
     });
 
-    // 보드가 존재하지 않으면 에러 메시지 출력
     if (!board) {
       throw new NotFoundException(`존재하지 않는 보드입니다.`);
     }
 
-    // 사용자가 보드 멤버인지 확인
     const isMember = await this.boardMemberRepository.findOne({
       where: { boardId: id, userId },
     });
@@ -54,7 +52,21 @@ export class BoardService {
       throw new UnauthorizedException('해당 보드에 접근할 권한이 없습니다.');
     }
 
-    return board;
+    const response = {
+      id: board.id,
+      title: board.title,
+      description: board.description,
+      color: board.color,
+      createdAt: board.createdAt,
+      updatedAt: board.updatedAt,
+      boardMembers: board.boardMembers.map((member) => ({
+        id: member.id,
+        userId: member.userId,
+      })),
+      lists: board.lists,
+    };
+
+    return response;
   }
 
   // 보드 수정
