@@ -11,6 +11,7 @@ import { ListModule } from './list/list.module';
 import { CardModule } from './card/card.module';
 import { CommentModule } from './comment/comment.module';
 import { InvitationModule } from './invitation/invitation.module';
+import { MailModule } from './mail/mail.module';
 
 @Module({
   imports: [
@@ -26,6 +27,7 @@ import { InvitationModule } from './invitation/invitation.module';
     CardModule,
     CommentModule,
     InvitationModule,
+    MailModule,
   ],
   controllers: [AppController],
 })
