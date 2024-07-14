@@ -1,23 +1,24 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { Mail } from './entities/mail.entity';
-import { Repository } from 'typeorm';
+import { Email } from './entities/email.entity';
+import { LessThan, Repository } from 'typeorm';
 import nodeMailer from 'nodemailer';
 import { SendEmailDto } from './dtos/send-email.dto';
 import { JwtService } from '@nestjs/jwt';
 import { InjectRepository } from '@nestjs/typeorm';
-import { SaveMailDto } from './dtos/save-email.dto';
+import { SaveEmailDto } from './dtos/save-email.dto';
+import { Cron } from '@nestjs/schedule';
 
 @Injectable()
-export class MailService {
+export class EmailService {
   private readonly nodeMailerId: string;
   private readonly nodeMailerPass: string;
 
   constructor(
     private readonly configService: ConfigService,
     private readonly jwtService: JwtService,
-    @InjectRepository(Mail)
-    private readonly mailRepository: Repository<Mail>,
+    @InjectRepository(Email)
+    private readonly emailRepository: Repository<Email>,
   ) {
     this.nodeMailerId = this.configService.get<string>('NODE_MAILER_ID');
     this.nodeMailerPass = this.configService.get<string>('NODE_MAILER_PASSWORD');
@@ -25,11 +26,11 @@ export class MailService {
 
   // return 값 지우고, async await 빼기 = response는 보내고, 실제로 서버 뒤에서 처리하고 있어도 됨
   // 메일 보내기
-  async sendMail({ email, boardId }: SendEmailDto) {
+  async sendEmail({ email, boardId }: SendEmailDto) {
     // 토큰 만들기
     const token = this.makeToken({ email, boardId }).token;
 
-    this.saveMail({ email, token });
+    this.saveEmail({ email, token });
 
     // 메일 보내는 세팅 / 나중에 분리하자 1.
     const transporter = nodeMailer.createTransport({
@@ -83,8 +84,8 @@ export class MailService {
   }
 
   // 메일 보낸 기록 저장하기
-  saveMail(saveMailDto: SaveMailDto) {
-    this.mailRepository.save(saveMailDto);
+  saveEmail(saveEmailDto: SaveEmailDto) {
+    this.emailRepository.save(saveEmailDto);
   }
 
   // 토큰 만들기
@@ -99,8 +100,8 @@ export class MailService {
   }
 
   // 메일 보낸 기록 검색하기
-  async findMail({ email }: { email: string }) {
-    const isExistedEmail = await this.mailRepository.findOne({
+  async findEmail({ email }: { email: string }) {
+    const isExistedEmail = await this.emailRepository.findOne({
       where: { email },
     });
     if (!isExistedEmail) {
@@ -108,5 +109,24 @@ export class MailService {
     }
 
     return isExistedEmail;
+  }
+
+  async deleteOldEmails() {
+    // DB 시간 가져오기
+    const result = await this.emailRepository.query('SELECT NOW() as currentTime');
+    const dbTime = new Date(result[0].currentTime);
+    const fiveMinutesAgo = new Date(dbTime.getTime() - 5 * 60 * 1000);
+
+    const deletedEmails = await this.emailRepository.delete({
+      createdAt: LessThan(fiveMinutesAgo),
+    });
+    console.log('🚀 ~ EmailService ~ deleteOldEmails:', fiveMinutesAgo, ' 이전 이메일 삭제', deletedEmails.affected);
+  }
+
+  // 1분마다 실행. 정확히는 0초일때마다 실행
+  @Cron('0 * * * * *')
+  async handleCron() {
+    console.log('🚀deleteOldEmails 실행 시간', new Date(Date.now()));
+    await this.deleteOldEmails();
   }
 }

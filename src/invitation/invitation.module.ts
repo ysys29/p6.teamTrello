@@ -5,10 +5,10 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { BoardInvitation } from './entities/invitation.entity';
 import { BoardMember } from 'src/board/entities/board-member.entity';
 import { User } from 'src/user/entities/user.entity';
-import { MailModule } from 'src/mail/mail.module';
+import { EmailModule } from 'src/email/email.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([BoardInvitation, BoardMember, User]), MailModule],
+  imports: [TypeOrmModule.forFeature([BoardInvitation, BoardMember, User]), EmailModule],
   controllers: [InvitationController],
   providers: [InvitationService],
   exports: [InvitationService],

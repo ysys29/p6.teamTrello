@@ -8,13 +8,13 @@ import { JwtModule } from '@nestjs/jwt';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { LocalStrategy } from './strategies/local.strategy';
 import { JwtStrategy } from './strategies/jwt.strategy';
-import { Mail } from 'src/mail/entities/mail.entity';
-import { MailService } from 'src/mail/mail.service';
+import { Email } from 'src/email/entities/email.entity';
+import { EmailService } from 'src/email/email.service';
 import { InvitationModule } from 'src/invitation/invitation.module';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([User, Mail]),
+    TypeOrmModule.forFeature([User, Email]),
     PassportModule,
     JwtModule.registerAsync({
       imports: [ConfigModule],
@@ -29,6 +29,6 @@ import { InvitationModule } from 'src/invitation/invitation.module';
     InvitationModule,
   ],
   controllers: [AuthController],
-  providers: [AuthService, MailService, LocalStrategy, JwtStrategy],
+  providers: [AuthService, EmailService, LocalStrategy, JwtStrategy],
 })
 export class AuthModule {}
