@@ -65,14 +65,13 @@ export class AuthService {
     console.log('🚀 ~ AuthService ~ signUp ~ user:', user);
 
     if (boardId !== 0) {
-      console.log('🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀');
       // 보드 아이디 가지고 보드 초대 상태 변경하는 API 실행
       const invitations = await this.invitationService.getReceivedInvitations(user.id);
 
       // 찾아보고 있으면 상태도 변경해주고 아니면 넘어가기.
       if (invitations && invitations.length > 0) {
         await this.invitationService.changeInvitationStatus(user.id, invitations[0].id, {
-          status: InvitationStatus.DECLINED,
+          status: InvitationStatus.ACCEPTED,
         });
       }
     }
