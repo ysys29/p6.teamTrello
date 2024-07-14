@@ -11,7 +11,8 @@ import { ListModule } from './list/list.module';
 import { CardModule } from './card/card.module';
 import { CommentModule } from './comment/comment.module';
 import { InvitationModule } from './invitation/invitation.module';
-import { MailModule } from './mail/mail.module';
+import { EmailModule } from './email/email.module';
+import { ScheduleModule } from '@nestjs/schedule';
 
 @Module({
   imports: [
@@ -27,7 +28,8 @@ import { MailModule } from './mail/mail.module';
     CardModule,
     CommentModule,
     InvitationModule,
-    MailModule,
+    EmailModule,
+    ScheduleModule.forRoot(),
   ],
   controllers: [AppController],
 })

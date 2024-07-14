@@ -15,7 +15,7 @@ import { BoardMember } from 'src/board/entities/board-member.entity';
 import { User } from 'src/user/entities/user.entity';
 import { InvitationStatus } from './types/invitation-status.type';
 import { UpdateInvitationStatusDto } from './dtos/update-invitation-status.dto';
-import { MailService } from 'src/mail/mail.service';
+import { EmailService } from 'src/email/email.service';
 
 @Injectable()
 export class InvitationService {
@@ -26,7 +26,7 @@ export class InvitationService {
     private readonly boardMemberRepository: Repository<BoardMember>,
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
-    private readonly mailService: MailService,
+    private readonly emailService: EmailService,
     private readonly dataSource: DataSource,
   ) {}
 
@@ -67,7 +67,7 @@ export class InvitationService {
 
     // 초대 기록이 없고, 가입하지 않은 유저라면 메일 보내기
     if (!user) {
-      this.mailService.sendMail({ email, boardId });
+      this.emailService.sendEmail({ email, boardId });
     }
 
     // 초대 저장하기

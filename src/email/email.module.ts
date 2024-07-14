@@ -1,14 +1,14 @@
 import { Module } from '@nestjs/common';
-import { MailService } from './mail.service';
-import { MailController } from './mail.controller';
+import { EmailService } from './email.service';
+import { EmailController } from './email.controller';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { Mail } from './entities/mail.entity';
+import { Email } from './entities/email.entity';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { JwtModule } from '@nestjs/jwt';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([Mail]),
+    TypeOrmModule.forFeature([Email]),
     ConfigModule,
     JwtModule.registerAsync({
       imports: [ConfigModule],
@@ -21,8 +21,8 @@ import { JwtModule } from '@nestjs/jwt';
       }),
     }),
   ],
-  controllers: [MailController],
-  providers: [MailService],
-  exports: [MailService],
+  controllers: [EmailController],
+  providers: [EmailService],
+  exports: [EmailService],
 })
-export class MailModule {}
+export class EmailModule {}

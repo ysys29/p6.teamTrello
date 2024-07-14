@@ -6,7 +6,7 @@ import { User } from 'src/user/entities/user.entity';
 import { Repository } from 'typeorm';
 import { SignInDto } from './dtos/sign-in.dto';
 import bcrypt from 'bcrypt';
-import { MailService } from 'src/mail/mail.service';
+import { EmailService } from 'src/email/email.service';
 import { SignUpDto } from './dtos/sign-up.dto';
 import { InvitationService } from 'src/invitation/invitation.service';
 import { InvitationStatus } from 'src/invitation/types/invitation-status.type';
@@ -18,7 +18,7 @@ export class AuthService {
     private readonly jwtService: JwtService,
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
-    private readonly mailService: MailService,
+    private readonly emailService: EmailService,
     private readonly invitationService: InvitationService,
   ) {}
 
@@ -37,10 +37,10 @@ export class AuthService {
     }
 
     // 해당 email로 인증 메일을 보낸 적이 있는 지 확인.
-    const existedMail = await this.mailService.findMail({ email });
-    if (!existedMail) {
+    const existedEmail = await this.emailService.findEmail({ email });
+    if (!existedEmail) {
       throw new BadRequestException('인증 이메일을 발송한 기록이 없습니다.');
-    } else if (existedMail.token !== token) {
+    } else if (existedEmail.token !== token) {
       throw new BadRequestException('유효하지 않은 토큰입니다.');
     }
 
