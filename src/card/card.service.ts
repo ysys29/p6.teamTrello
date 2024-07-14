@@ -10,6 +10,7 @@ import { List } from 'src/list/entities/list.entity';
 import { User } from 'src/user/entities/user.entity';
 import { CardMember } from './entities/card-member.entity';
 import { CreateCardMeberDto } from './dto/create-card-member.dto';
+
 @Injectable()
 export class CardService {
   constructor(

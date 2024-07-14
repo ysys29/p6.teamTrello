@@ -6,6 +6,8 @@ import { ApiTags, ApiBearerAuth } from '@nestjs/swagger';
 import { AuthGuard } from '@nestjs/passport';
 import { ReorderCardDto } from './dto/reorder-card.dto';
 import { CreateCardMeberDto } from './dto/create-card-member.dto';
+import { SearchCardParamsDto } from './dto/search-card.dto';
+import { SearchUserParamsDto } from 'src/user/dtos/search-user.dto';
 @ApiTags('카드 정보')
 @Controller('card')
 export class CardController {
@@ -52,7 +54,7 @@ export class CardController {
   @ApiBearerAuth()
   @UseGuards(AuthGuard('jwt'))
   @Get(':id')
-  async findOne(@Param('id') id: string) {
+  async findOne(@Param('id') id: SearchCardParamsDto) {
     const data = await this.cardService.findOne(+id);
     return {
       statusCode: 201,
@@ -70,7 +72,7 @@ export class CardController {
   @ApiBearerAuth()
   @UseGuards(AuthGuard('jwt'))
   @Patch(':id')
-  async update(@Param('id') id: string, @Body() updateCardDto: UpdateCardDto) {
+  async update(@Param('id') id: SearchCardParamsDto, @Body() updateCardDto: UpdateCardDto) {
     const data = await this.cardService.update(+id, updateCardDto);
     return {
       statusCode: 201,
@@ -87,7 +89,7 @@ export class CardController {
   @ApiBearerAuth()
   @UseGuards(AuthGuard('jwt'))
   @Delete(':id')
-  async remove(@Param('id') id: string) {
+  async remove(@Param('id') id: SearchCardParamsDto) {
     const data = await this.cardService.remove(+id);
     return {
       statusCode: 200,
@@ -105,8 +107,8 @@ export class CardController {
   @ApiBearerAuth()
   @UseGuards(AuthGuard('jwt'))
   @Patch(':cardId/reorder')
-  async reorderCard(@Param('cardId') cardId: number, @Body() reorderCardDto: ReorderCardDto) {
-    return await this.cardService.reorderCard(cardId, reorderCardDto);
+  async reorderCard(@Param('cardId') cardId: SearchCardParamsDto, @Body() reorderCardDto: ReorderCardDto) {
+    return await this.cardService.reorderCard(cardId.cardId, reorderCardDto);
   }
 
   /**
@@ -118,8 +120,8 @@ export class CardController {
   //@ApiBearerAuth()
   //@UseGuards(AuthGuard('jwt'))
   @Post(':cardId/workers')
-  async choiceWorker(@Param('cardId') cardId: number, @Body() createCardMeberDto: CreateCardMeberDto) {
-    return await this.cardService.choiceWorker(cardId, createCardMeberDto);
+  async choiceWorker(@Param('cardId') cardId: SearchCardParamsDto, @Body() createCardMeberDto: CreateCardMeberDto) {
+    return await this.cardService.choiceWorker(cardId.cardId, createCardMeberDto);
   }
 
   /**
@@ -129,7 +131,7 @@ export class CardController {
    * @returns
    */
   @Get(':cardId/workers/:workerId')
-  async findWorker(@Param('cardId') cardId: number, @Param('workerId') workerId: number) {
-    return await this.cardService.findWorker(cardId, workerId);
+  async findWorker(@Param('cardId') cardId: SearchCardParamsDto, @Param('workerId') workerId: SearchUserParamsDto) {
+    return await this.cardService.findWorker(cardId.cardId, workerId.userId);
   }
 }

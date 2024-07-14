@@ -10,7 +10,7 @@ export class CardMember {
 
   /**
    * 유저 아이디
-   * @example "1"
+   * @example 1
    */
   @IsNotEmpty({ message: `cardId 입력해주세요` })
   @Column()
@@ -18,7 +18,7 @@ export class CardMember {
 
   /**
    * 유저 아이디
-   * @example "1"
+   * @example 1
    */
   @IsNotEmpty({ message: `userId 입력해주세요` })
   @Column()
