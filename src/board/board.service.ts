@@ -1,7 +1,7 @@
 import { Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { CreateBoardDto } from './dtos/create-board.dto';
 import { UpdateBoardDto } from './dtos/update-board.dto';
-import { Repository } from 'typeorm';
+import { In, Like, Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Board } from './entities/board.entity';
 import { BoardMember } from './entities/board-member.entity';
@@ -114,12 +114,28 @@ export class BoardService {
 
   // 사용자가 속한 보드 조회
   async getUserBoards(userId: number): Promise<Board[]> {
-    console.log('Service - User ID:', userId);
     const boardMembers = await this.boardMemberRepository.find({
       where: { userId },
       relations: ['board'],
     });
-    console.log('Service - Board Members:', boardMembers);
     return boardMembers.map((member) => member.board);
+  }
+
+  // 제목별로 보드 검색
+  async searchBoardsByTitle(userId: number, title: string): Promise<Board[]> {
+    const boardMembers = await this.boardMemberRepository.find({
+      where: { userId },
+      relations: ['board'],
+    });
+
+    // board가 null이 아닌 경우만 필터링
+    const boardIds = boardMembers.filter((member) => member.board !== null).map((member) => member.board.id);
+
+    return this.boardRepository.find({
+      where: {
+        id: In(boardIds),
+        title: Like(`%${title}%`),
+      },
+    });
   }
 }

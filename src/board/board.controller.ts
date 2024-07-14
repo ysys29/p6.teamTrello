@@ -10,6 +10,7 @@ import {
   UseGuards,
   HttpStatus,
   BadRequestException,
+  Query,
 } from '@nestjs/common';
 import { BoardService } from './board.service';
 import { CreateBoardDto } from './dtos/create-board.dto';
@@ -27,12 +28,27 @@ export class BoardController {
   @Get('joined')
   async getUserBoards(@Request() req) {
     const userId = req.user.id;
-    console.log('Controller - User ID:', userId);
     const data = await this.boardService.getUserBoards(Number(userId));
-    console.log('Controller - Retrieved Boards:', data);
     return {
       statusCode: HttpStatus.OK,
       message: '사용자가 속한 보드 조회에 성공했습니다.',
+      data,
+    };
+  }
+
+  //boards/search?title=수정        제목에 수정이 들어간느 보드 조회시 검색예시
+  @ApiBearerAuth()
+  @UseGuards(AuthGuard('jwt'))
+  @Get('search')
+  async searchBoards(@Request() req, @Query('title') title: string) {
+    const userId = req.user.id;
+    if (!title) {
+      throw new BadRequestException('검색할 제목을 입력해 주세요.');
+    }
+    const data = await this.boardService.searchBoardsByTitle(Number(userId), title);
+    return {
+      statusCode: HttpStatus.OK,
+      message: '보드 검색에 성공했습니다.',
       data,
     };
   }
@@ -82,7 +98,7 @@ export class BoardController {
 
     return {
       statusCode: HttpStatus.OK,
-      message: '보드 수정에 성공했습니다.',
+      message: `${id}번 보드 수정에 성공했습니다.`,
       data,
     };
   }
