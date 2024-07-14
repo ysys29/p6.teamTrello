@@ -82,9 +82,6 @@ export class ListService {
 
   // 리스트 이름 수정
   async updateListTitle(userId: number, listId: number, { title }: UpdateListDto) {
-    if (!title) {
-      throw new BadRequestException('리스트 이름을 입력해 주세요.');
-    }
     // 리스트 접근 권한 체크
     const list = await this.validateListAccess({ userId, listId });
 
