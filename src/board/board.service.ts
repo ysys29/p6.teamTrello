@@ -108,20 +108,43 @@ export class BoardService {
   }
 
   // 보드 멤버 조회
-  async getBoardMembers(boardId: number, userId: number): Promise<BoardMember[]> {
+  async getBoardMembers(boardId: number, userId: number) {
     // 사용자가 보드 멤버인지 확인
+    const board = await this.boardRepository.find({
+      where: { id: boardId, deletedAt: null },
+    });
+
+    if (!board) {
+      throw new NotFoundException('삭제된 보드 입니다 ');
+    }
     const isMember = await this.boardMemberRepository.findOne({
-      where: { boardId, userId },
+      relations: { board: true },
+      where: {
+        boardId,
+        userId,
+        board: {
+          deletedAt: null, //삭제가 된거는 안가져올래요
+        },
+      },
     });
 
     if (!isMember) {
       throw new UnauthorizedException('해당 보드에 접근할 권한이 없습니다.');
     }
 
-    return this.boardMemberRepository.find({
-      where: { boardId },
-      relations: ['user'],
+    const data = await this.boardMemberRepository.find({
+      relations: { board: true },
+      where: {
+        boardId: boardId,
+        board: {
+          deletedAt: null,
+          id: boardId,
+        },
+      },
     });
+    if (data.length === 0) {
+      throw new NotFoundException('삭제된 보드입니다');
+    }
   }
 
   // 사용자가 속한 보드 조회
@@ -130,7 +153,13 @@ export class BoardService {
       where: { userId },
       relations: ['board'],
     });
-    return boardMembers.map((member) => member.board);
+
+    // board가 null이 아니고 deletedAt이 null인 경우만 필터링
+    const boards = boardMembers
+      .map((member) => member.board)
+      .filter((board) => board !== null && board.deletedAt === null);
+
+    return boards;
   }
 
   // 제목별로 보드 검색
