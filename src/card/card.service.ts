@@ -7,11 +7,16 @@ import { Repository } from 'typeorm';
 import { ReorderCardDto } from './dto/reorder-card.dto';
 import { LexoRank } from 'lexorank';
 import { List } from 'src/list/entities/list.entity';
+import { User } from 'src/user/entities/user.entity';
+import { CardMember } from './entities/card-member.entity';
+import { CreateCardMeberDto } from './dto/create-card-member.dto';
 @Injectable()
 export class CardService {
   constructor(
     @InjectRepository(Card) private readonly cardRepository: Repository<Card>,
     @InjectRepository(List) private readonly listRepository: Repository<List>,
+    @InjectRepository(User) private readonly userRepository: Repository<User>,
+    @InjectRepository(CardMember) private readonly cardMemeberRepository: Repository<CardMember>,
   ) {}
 
   async create(createCardDto: CreateCardDto) {
@@ -65,8 +70,11 @@ export class CardService {
     // 카드를 가지고 있는지 여부 검사
     const card = await this.cardRepository.findOne({
       where: { id },
+      relations: ['cardMembers'],
     });
+
     if (!card) throw new NotFoundException('카드를 찾을 수 없습니다.');
+
     return card;
   }
 
@@ -151,5 +159,42 @@ export class CardService {
       lexoRank: lexoRank.toString(),
     });
     return await this.findAll();
+  }
+
+  async choiceWorker(cardId: number, createCardMeberDto: CreateCardMeberDto) {
+    const { userId } = createCardMeberDto;
+    // 카드아이디에 맞는 카드가 없다면
+    const existedCard = await this.cardRepository.findOneBy({ id: cardId });
+    if (!existedCard) throw new NotFoundException('카드 없음');
+
+    // 유저아이디에 맞는 유저가 없다면
+    // 유저정보를 이렇게 불러야하나?
+    const existedUser = await this.userRepository.findOneBy({ id: userId });
+    if (!existedUser) throw new NotFoundException('유저 없음');
+
+    // 유저가 이미 카드 작업자로 할당 되있다면 false반환
+    const existedWorker = await this.cardMemeberRepository.findOneBy({ userId: userId });
+    if (existedWorker) throw new NotFoundException('유저가 이미 등록되어있음.');
+    //카드 작업자 할당 = 카드 작업자 데이터 생성
+    const cardWorker = await this.cardMemeberRepository.save({
+      cardId,
+      userId,
+    });
+    return cardWorker;
+  }
+
+  async findWorker(cardId: number, workerId: number) {
+    // 카드에 맞는 해당 작업자가 없다면 false반환
+    const existedWorker = await this.cardMemeberRepository.findOneBy({
+      cardId: cardId,
+      userId: workerId,
+    });
+    if (!existedWorker) throw new NotFoundException('해당 카드에 맞는 작업자가 없습니다.');
+    const worker = await this.userRepository.findOneBy({
+      id: workerId,
+    });
+    if (!worker) throw new NotFoundException('사용자 정보를 찾을 수 없습니다.');
+
+    return worker;
   }
 }

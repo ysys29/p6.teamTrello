@@ -5,6 +5,7 @@ import { UpdateCardDto } from './dto/update-card.dto';
 import { ApiTags, ApiBearerAuth } from '@nestjs/swagger';
 import { AuthGuard } from '@nestjs/passport';
 import { ReorderCardDto } from './dto/reorder-card.dto';
+import { CreateCardMeberDto } from './dto/create-card-member.dto';
 @ApiTags('카드 정보')
 @Controller('card')
 export class CardController {
@@ -101,11 +102,34 @@ export class CardController {
    * @param reorderCardDto
    * @returns
    */
-  // 카드 순서 변경
   @ApiBearerAuth()
   @UseGuards(AuthGuard('jwt'))
   @Patch(':cardId/reorder')
   async reorderCard(@Param('cardId') cardId: number, @Body() reorderCardDto: ReorderCardDto) {
     return await this.cardService.reorderCard(cardId, reorderCardDto);
+  }
+
+  /**
+   * 카드 작업자 할당
+   * @param cardId
+   * @param workersDto
+   * @returns
+   */
+  //@ApiBearerAuth()
+  //@UseGuards(AuthGuard('jwt'))
+  @Post(':cardId/workers')
+  async choiceWorker(@Param('cardId') cardId: number, @Body() createCardMeberDto: CreateCardMeberDto) {
+    return await this.cardService.choiceWorker(cardId, createCardMeberDto);
+  }
+
+  /**
+   * 카드 작업자 정보 조회
+   * @param cardId
+   * @param workerId
+   * @returns
+   */
+  @Get(':cardId/workers/:workerId')
+  async findWorker(@Param('cardId') cardId: number, @Param('workerId') workerId: number) {
+    return await this.cardService.findWorker(cardId, workerId);
   }
 }
