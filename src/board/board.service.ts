@@ -79,8 +79,8 @@ export class BoardService {
     return this.boardRepository.save(board);
   }
 
-  // 보드 삭제
-  async remove(id: number, userId: number): Promise<void> {
+  // 보드 소프트 삭제
+  async softDelete(id: number, userId: number): Promise<void> {
     const board = await this.boardRepository.findOne({ where: { id } });
 
     if (!board) {
@@ -92,7 +92,7 @@ export class BoardService {
       throw new UnauthorizedException('보드를 삭제할 권한이 없습니다.');
     }
 
-    await this.boardRepository.remove(board);
+    await this.boardRepository.softRemove(board);
   }
 
   // 보드 멤버 조회
@@ -114,11 +114,12 @@ export class BoardService {
 
   // 사용자가 속한 보드 조회
   async getUserBoards(userId: number): Promise<Board[]> {
+    console.log('Service - User ID:', userId);
     const boardMembers = await this.boardMemberRepository.find({
       where: { userId },
       relations: ['board'],
     });
-
+    console.log('Service - Board Members:', boardMembers);
     return boardMembers.map((member) => member.board);
   }
 }
