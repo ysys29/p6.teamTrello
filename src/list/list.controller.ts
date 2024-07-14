@@ -4,6 +4,7 @@ import { ReorderListDto } from './dtos/reorder-list.dto';
 import { CreateListDto } from './dtos/create-list.dto';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { AuthGuard } from '@nestjs/passport';
+import { UpdateListDto } from './dtos/update-list.dto';
 
 @ApiTags('리스트')
 @Controller('lists')
@@ -12,15 +13,15 @@ export class ListController {
 
   /**
    * 리스트 생성
-   * @param craeteListDto
+   * @param createListDto
    * @returns
    */
   // 리스트 생성
   @ApiBearerAuth()
   @UseGuards(AuthGuard('jwt'))
   @Post()
-  async createList(@Request() req, @Body() craeteListDto: CreateListDto) {
-    return await this.listService.createList(req.user.id, craeteListDto);
+  async createList(@Request() user, @Body() createListDto: CreateListDto) {
+    return await this.listService.createList(user.id, createListDto);
   }
 
   /**
@@ -32,8 +33,8 @@ export class ListController {
   @ApiBearerAuth()
   @UseGuards(AuthGuard('jwt'))
   @Get(':listId')
-  async getList(@Request() req, @Param('listId') listId: number) {
-    return await this.listService.getList(req.user.id, listId);
+  async getList(@Request() user, @Param('listId') listId: number) {
+    return await this.listService.getList(user.id, listId);
   }
 
   /**
@@ -46,8 +47,8 @@ export class ListController {
   @ApiBearerAuth()
   @UseGuards(AuthGuard('jwt'))
   @Patch(':listId/title')
-  async updateListTitle(@Request() req, @Param('listId') listId: number, @Body('title') title: string) {
-    return await this.listService.updateListTitle(req.user.id, listId, title);
+  async updateListTitle(@Request() user, @Param('listId') listId: number, @Body() updateListDto: UpdateListDto) {
+    return await this.listService.updateListTitle(user.id, listId, updateListDto);
   }
 
   /**
@@ -60,8 +61,8 @@ export class ListController {
   @ApiBearerAuth()
   @UseGuards(AuthGuard('jwt'))
   @Patch(':listId/reorder')
-  async reorderList(@Request() req, @Param('listId') listId: number, @Body() reorderListDto: ReorderListDto) {
-    return await this.listService.reorderList(req.user.id, listId, reorderListDto);
+  async reorderList(@Request() user, @Param('listId') listId: number, @Body() reorderListDto: ReorderListDto) {
+    return await this.listService.reorderList(user.id, listId, reorderListDto);
   }
 
   /**
@@ -73,13 +74,7 @@ export class ListController {
   @ApiBearerAuth()
   @UseGuards(AuthGuard('jwt'))
   @Delete(':listId')
-  async deleteList(@Request() req, @Param('listId') listId: number) {
-    return await this.listService.deleteList(req.user.id, listId);
-  }
-
-  // 리스트 목록 조회 // 리스트 순서 변경 제대로 되나 확인용 api == 삭제 요
-  @Get()
-  async getAllLists(@Body('boardId') boardId: number) {
-    return await this.listService.getAllLists(boardId);
+  async deleteList(@Request() user, @Param('listId') listId: number) {
+    return await this.listService.deleteList(user.id, listId);
   }
 }
