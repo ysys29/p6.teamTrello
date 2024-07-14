@@ -10,5 +10,6 @@ import { User } from 'src/user/entities/user.entity';
   imports: [TypeOrmModule.forFeature([BoardInvitation, BoardMember, User])],
   controllers: [InvitationController],
   providers: [InvitationService],
+  exports: [InvitationService],
 })
 export class InvitationModule {}
