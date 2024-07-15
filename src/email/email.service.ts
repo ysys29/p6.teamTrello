@@ -122,11 +122,4 @@ export class EmailService {
     });
     console.log('🚀 ~ EmailService ~ deleteOldEmails:', fiveMinutesAgo, ' 이전 이메일 삭제', deletedEmails.affected);
   }
-
-  // 1분마다 실행. 정확히는 0초일때마다 실행
-  @Cron('0 * * * * *')
-  async handleCron() {
-    console.log('🚀deleteOldEmails 실행 시간', new Date(Date.now()));
-    await this.deleteOldEmails();
-  }
 }
