@@ -1,18 +1,38 @@
+import { IsNotEmpty, IsNumber } from 'class-validator';
 import { Card } from 'src/card/entities/card.entity';
 import { User } from 'src/user/entities/user.entity';
-import { Column, CreateDateColumn, Entity, ManyToOne, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
+import {
+  Column,
+  CreateDateColumn,
+  Entity,
+  JoinColumn,
+  ManyToOne,
+  PrimaryGeneratedColumn,
+  UpdateDateColumn,
+} from 'typeorm';
 
 @Entity('comments')
 export class Comment {
-  @PrimaryGeneratedColumn()
+  @PrimaryGeneratedColumn({ unsigned: true })
   id: number;
-
-  @Column()
+  /**
+   * 카드 아이디
+   * @example "1"
+   */
+  @IsNumber()
+  @IsNotEmpty({ message: '댓글 작성할 카드Id를 입력해주세요.' })
+  @Column({ unsigned: true })
   cardId: number;
 
+  @IsNumber()
   @Column()
   userId: number;
 
+  /**
+   * 내용
+   * @example "내용내용"
+   */
+  @IsNotEmpty({ message: '댓글을 입력해주세요' })
   @Column({ type: 'text' })
   comment: string;
 
@@ -22,9 +42,11 @@ export class Comment {
   @UpdateDateColumn()
   updateAt: Date;
 
-  @ManyToOne((type) => Card, (card) => card.comments)
+  @ManyToOne(() => Card, (card) => card.comments, { onDelete: 'CASCADE' })
+  @JoinColumn({ name: 'cardId' })
   card: Card;
 
-  @ManyToOne((type) => User, (user) => user.comments)
+  @ManyToOne(() => User, (user) => user.comments)
+  @JoinColumn({ name: 'userId' })
   user: User;
 }
