@@ -132,7 +132,7 @@ export class BoardService {
       throw new UnauthorizedException('해당 보드에 접근할 권한이 없습니다.');
     }
 
-    const data = await this.boardMemberRepository.find({
+    const members = await this.boardMemberRepository.find({
       relations: { board: true },
       where: {
         boardId: boardId,
@@ -142,9 +142,21 @@ export class BoardService {
         },
       },
     });
-    if (data.length === 0) {
+
+    if (members.length === 0) {
       throw new NotFoundException('삭제된 보드입니다');
     }
+
+    // 필요한 데이터만 추출
+    const data = members.map((member) => ({
+      id: member.id,
+      boardId: member.boardId,
+      userId: member.userId,
+      createdAt: member.createdAt,
+      updatedAt: member.updatedAt,
+    }));
+
+    return data; // 정제된 데이터를 반환
   }
 
   // 사용자가 속한 보드 조회
