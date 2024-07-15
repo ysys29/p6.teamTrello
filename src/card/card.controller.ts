@@ -5,7 +5,7 @@ import { UpdateCardDto } from './dto/update-card.dto';
 import { ApiTags, ApiBearerAuth } from '@nestjs/swagger';
 import { AuthGuard } from '@nestjs/passport';
 import { ReorderCardDto } from './dto/reorder-card.dto';
-import { CreateCardMeberDto } from './dto/create-card-member.dto';
+import { CreateCardMemberDto } from './dto/create-card-member.dto';
 import { SearchCardParamsDto } from './dto/search-card.dto';
 import { SearchCardMemeberParamsDto } from './dto/search-card-member.dto';
 import { HttpStatus } from '@nestjs/common';
@@ -125,7 +125,7 @@ export class CardController {
   @ApiBearerAuth()
   @UseGuards(AuthGuard('jwt'))
   @Post(':cardId/workers')
-  async choiceWorker(@Param() searchCardParam: SearchCardParamsDto, @Body() createCardMeberDto: CreateCardMeberDto) {
+  async choiceWorker(@Param() searchCardParam: SearchCardParamsDto, @Body() createCardMeberDto: CreateCardMemberDto) {
     const data = await this.cardService.choiceWorker(searchCardParam.cardId, createCardMeberDto);
     return {
       statusCode: HttpStatus.OK,

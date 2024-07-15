@@ -2,14 +2,14 @@ import { IsString, IsHexColor, IsNumber } from 'class-validator';
 
 export class CreateCardDto {
   @IsNumber()
-  listId?: number;
+  listId: number;
 
   @IsString()
-  title?: string;
+  title: string;
 
   @IsString()
-  content?: string;
+  content: string;
 
   @IsHexColor({ message: '올바른 색상 코드를 입력해 주세오' })
-  color?: string;
+  color: string;
 }
