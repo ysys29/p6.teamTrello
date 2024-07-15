@@ -28,7 +28,7 @@ export class List {
   lexoRank: string;
 
   @CreateDateColumn()
-  createAt: Date;
+  createdAt: Date;
 
   @UpdateDateColumn()
   updatedAt: Date;
