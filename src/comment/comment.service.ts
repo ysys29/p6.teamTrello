@@ -36,12 +36,23 @@ export class CommentService {
     return data;
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} comment`;
-  }
+  async update(id: number, updateCommentDto: UpdateCommentDto) {
+    //해당하는 카드 찾기
+    const { cardId, comment } = updateCommentDto;
+    const card = await this.cardRepository.findOneBy({ id: cardId });
+    if (!card) {
+      throw new NotFoundException('해당하는 카드가 없습니다.');
+    }
+    //해당하는 댓글 찾기
+    const findComment = await this.commentRepository.findOneBy({ id });
+    if (!findComment) {
+      throw new NotFoundException('해당하는 댓글이 없습니다.');
+    }
 
-  update(id: number, updateCommentDto: UpdateCommentDto) {
-    return `This action updates a #${id} comment`;
+    //수정
+    const updateComment = await this.commentRepository.save({ id, updateCommentDto });
+    //반환
+    return updateComment;
   }
 
   remove(id: number) {

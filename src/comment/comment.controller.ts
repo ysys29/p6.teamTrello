@@ -42,18 +42,26 @@ export class CommentController {
     return {
       statusCode: 200,
       message: '댓글 조회에 성공했습니다.',
-      data: data,
+      data,
     };
   }
 
-  @Get(':id')
-  findOne(@Param('id') id: number) {
-    return this.commentService.findOne(id);
-  }
-
+  /**
+   * 댓글수정
+   * @param updateCommentDto
+   * @returns
+   */
+  @ApiBearerAuth()
+  @UseGuards(AuthGuard('jwt'))
   @Patch(':id')
-  update(@Param('id') id: number, @Body() updateCommentDto: UpdateCommentDto) {
-    return this.commentService.update(id, updateCommentDto);
+  //파라미터에 수정 댓글 아이디 넣기
+  async update(@Param('id') id: number, @Body() updateCommentDto: UpdateCommentDto) {
+    const data = await this.commentService.update(id, updateCommentDto);
+    return {
+      statusCode: 200,
+      message: '댓글 수정에 성공했습니다.',
+      data,
+    };
   }
 
   @Delete(':id')
