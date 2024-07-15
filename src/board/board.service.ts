@@ -5,6 +5,7 @@ import { In, Like, Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Board } from './entities/board.entity';
 import { BoardMember } from './entities/board-member.entity';
+import { List } from '../list/entities/list.entity';
 
 @Injectable()
 export class BoardService {
@@ -13,6 +14,8 @@ export class BoardService {
     private readonly boardRepository: Repository<Board>,
     @InjectRepository(BoardMember)
     private readonly boardMemberRepository: Repository<BoardMember>,
+    @InjectRepository(List) // List 리포지토리 주입
+    private readonly listRepository: Repository<List>,
   ) {}
 
   // 보드 생성
@@ -52,6 +55,12 @@ export class BoardService {
       throw new UnauthorizedException('해당 보드에 접근할 권한이 없습니다.');
     }
 
+    // 리스트를 LexoRank로 정렬
+    const lists = await this.listRepository.find({
+      where: { boardId: board.id },
+      order: { lexoRank: 'ASC' },
+    });
+
     const response = {
       id: board.id,
       title: board.title,
@@ -63,7 +72,10 @@ export class BoardService {
         id: member.id,
         userId: member.userId,
       })),
-      lists: board.lists,
+      lists: lists.map((list) => ({
+        id: list.id,
+        title: list.title,
+      })),
     };
 
     return response;
