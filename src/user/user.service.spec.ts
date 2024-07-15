@@ -5,7 +5,7 @@ import { ConfigService } from '@nestjs/config';
 import { User } from './entities/user.entity';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { BadRequestException, NotFoundException } from '@nestjs/common';
-import { UpdateUserDto } from './dtos/update-user.dto';
+import bcrypt from 'bcrypt';
 
 type MockRepository<T = any> = Partial<Record<keyof Repository<T>, jest.Mock>>;
 type UserWithoutRelations = Omit<User, 'boards' | 'boardMembers' | 'cardMembers' | 'comments'>;
@@ -116,6 +116,7 @@ describe('UserService', () => {
       const nickname = '재밌어요';
       const imgUrl = '나에게테스트코드는살인이다';
       const hashedNewPassword = 'hashedNewPassword';
+      const hashRounds = 3;
       const mockUser: UserWithoutRelations = {
         id: 1,
         email: 'test@test.com',
@@ -126,19 +127,21 @@ describe('UserService', () => {
         updatedAt: new Date(),
         deletedAt: null,
       };
-      const mockUpdatedUser = {
+      const mockUpdatedUser: UserWithoutRelations = {
         id: 1,
         email: 'test@test.com',
-        password: newPassword,
+        password: 'hashedNewPassword',
         nickname: nickname,
         imgUrl: imgUrl,
         createdAt: new Date(),
         updatedAt: new Date(),
         deletedAt: null,
       };
-      const mockReturn = delete mockUpdatedUser.password;
+      const mockReturn = { ...mockUpdatedUser };
+      delete mockReturn.password;
 
-      mockUserRepository.findOneById.mockResolvedValue(mockUser);
+      jest.spyOn(bcrypt, 'hashSync').mockImplementation((newPassword: string, hashRounds: number) => hashedNewPassword);
+      mockUserRepository.findOneBy.mockResolvedValue(mockUser);
       mockUserRepository.save.mockResolvedValue(mockUpdatedUser);
       // When
       const result = await userService.update(id, { newPassword, newPasswordConfirm, nickname, imgUrl });
@@ -148,8 +151,9 @@ describe('UserService', () => {
       expect(mockUserRepository.findOneBy).toHaveBeenCalledTimes(1);
       expect(mockUserRepository.findOneBy).toHaveBeenCalledWith({ id });
 
+      console.log('🚀 ~ it ~ mockUpdatedUser:', mockUpdatedUser);
       expect(mockUserRepository.save).toHaveBeenCalledTimes(1);
-      expect(mockUserRepository.save).toHaveBeenCalledWith({ id });
+      expect(mockUserRepository.save).toHaveBeenCalledWith(mockUser);
       expect(result).toEqual(mockReturn);
     });
   });
