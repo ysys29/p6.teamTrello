@@ -3,7 +3,7 @@ import { UserController } from './user.controller';
 import { UserService } from './user.service';
 
 describe('UserController', () => {
-  let controller: UserController;
+  let userController: UserController;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -11,10 +11,18 @@ describe('UserController', () => {
       providers: [UserService],
     }).compile();
 
-    controller = module.get<UserController>(UserController);
+    userController = module.get<UserController>(UserController);
   });
 
   it('should be defined', () => {
-    expect(controller).toBeDefined();
+    expect(userController).toBeDefined();
+  });
+
+  describe('findOne', () => {
+    it('findOne test', async () => {
+      // Given
+      // When
+      // Then
+    });
   });
 });
