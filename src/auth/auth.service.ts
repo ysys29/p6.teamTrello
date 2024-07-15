@@ -37,11 +37,9 @@ export class AuthService {
     }
 
     // 해당 email로 인증 메일을 보낸 적이 있는 지 확인.
-    const existedEmail = await this.emailService.findEmail({ email });
+    const existedEmail = await this.emailService.findEmailByToken({ token });
     if (!existedEmail) {
       throw new BadRequestException('인증 이메일을 발송한 기록이 없습니다.');
-    } else if (existedEmail.token !== token) {
-      throw new BadRequestException('유효하지 않은 토큰입니다.');
     }
 
     // 인증 번호에 초대 받았는 지 그냥 가입한 건 지 체크.
