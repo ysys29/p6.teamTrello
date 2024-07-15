@@ -12,7 +12,7 @@ import {
 } from 'typeorm';
 import { CardMember } from './card-member.entity';
 import { Comment } from '../../comment/entities/comment.entity';
-import { IsNotEmpty } from 'class-validator';
+import { IsHexColor, IsNotEmpty } from 'class-validator';
 
 @Entity('cards')
 export class Card {
@@ -48,6 +48,7 @@ export class Card {
    * @example "#ffffff"
    */
   @IsNotEmpty({ message: `color 입력해주세요` })
+  @IsHexColor()
   @Column()
   color: string;
 

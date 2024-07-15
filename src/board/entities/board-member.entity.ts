@@ -10,6 +10,7 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 import { Board } from './board.entity';
+import { JoinColumn } from 'typeorm';
 
 @Entity('board_members')
 @Unique(['boardId', 'userId'])
