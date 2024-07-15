@@ -87,8 +87,8 @@ export class UserController {
   @ApiBearerAuth()
   @UseGuards(AuthGuard('jwt'))
   @Get(':userId')
-  async findOneById(@Param() userId: SearchUserParamsDto) {
-    const data = await this.userService.findOneById(userId.userId);
+  async findOneById(@Param() searchUserParamsDto: SearchUserParamsDto) {
+    const data = await this.userService.findOneById(searchUserParamsDto.userId);
 
     return {
       statusCode: HttpStatus.OK,
