@@ -56,7 +56,7 @@ export class Card {
   lexoRank: string;
 
   @Column({ nullable: true })
-  deadline: Date;
+  deadline?: Date;
 
   @CreateDateColumn()
   createdAt: Date;

@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
+import { Injectable, NotFoundException, ConflictException } from '@nestjs/common';
 import { CreateCardDto } from './dto/create-card.dto';
 import { UpdateCardDto } from './dto/update-card.dto';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -9,7 +9,7 @@ import { LexoRank } from 'lexorank';
 import { List } from 'src/list/entities/list.entity';
 import { User } from 'src/user/entities/user.entity';
 import { CardMember } from './entities/card-member.entity';
-import { CreateCardMeberDto } from './dto/create-card-member.dto';
+import { CreateCardMemberDto } from './dto/create-card-member.dto';
 
 @Injectable()
 export class CardService {
@@ -17,7 +17,7 @@ export class CardService {
     @InjectRepository(Card) private readonly cardRepository: Repository<Card>,
     @InjectRepository(List) private readonly listRepository: Repository<List>,
     @InjectRepository(User) private readonly userRepository: Repository<User>,
-    @InjectRepository(CardMember) private readonly cardMemeberRepository: Repository<CardMember>,
+    @InjectRepository(CardMember) private readonly cardMemberRepository: Repository<CardMember>,
   ) {}
 
   async create(createCardDto: CreateCardDto) {
@@ -26,7 +26,7 @@ export class CardService {
     const existedCard = await this.cardRepository.findOneBy({
       title: title,
     });
-    if (existedCard) throw new BadRequestException('이미 사용중인 카드 이름입니다.');
+    if (existedCard) throw new ConflictException('이미 사용중인 카드 이름입니다.');
 
     // LexoRank값 생성
     let lexoRank: LexoRank;
@@ -81,10 +81,10 @@ export class CardService {
 
   // 카드 수정
   async update(id: number, updateCardDto: UpdateCardDto) {
-    const { listId, title, content, color } = updateCardDto;
+    const { listId, title, content, color, deadline } = updateCardDto;
     // 카드를 가지고 있는지 여부 검사
-    const existedcard = this.findOne(id);
-    if (!existedcard) throw new NotFoundException('카드를 찾을 수 없습니다.');
+    const existedCard = this.findOne(id);
+    if (!existedCard) throw new NotFoundException('카드를 찾을 수 없습니다.');
 
     // 해당 리스트가 있는지 여부 검사
     const existedList = await this.listRepository.findOneBy({ id: listId });
@@ -101,6 +101,7 @@ export class CardService {
       ...(title !== null ? { title } : {}),
       ...(content !== null ? { content } : {}),
       ...(color !== null ? { color } : {}),
+      ...(deadline !== null ? { deadline } : {}),
     };
 
     const data = await this.cardRepository.update(updateCondition, updateData);
@@ -177,22 +178,22 @@ export class CardService {
   }
 
   // 작업자 할당
-  async choiceWorker(cardId: number, createCardMeberDto: CreateCardMeberDto) {
+  async choiceWorker(cardId: number, createCardMeberDto: CreateCardMemberDto) {
     const { userId } = createCardMeberDto;
     // 카드아이디에 맞는 카드가 없다면
     const existedCard = await this.cardRepository.findOneBy({ id: cardId });
     if (!existedCard) throw new NotFoundException('카드 없음');
 
     // 유저아이디에 맞는 유저가 없다면
-    // 유저정보를 이렇게 불러야하나?
+
     const existedUser = await this.userRepository.findOneBy({ id: userId });
     if (!existedUser) throw new NotFoundException('유저 없음');
 
     // 유저가 이미 카드 작업자로 할당 되있다면 false반환
-    const existedWorker = await this.cardMemeberRepository.findOneBy({ userId: userId });
-    if (existedWorker) throw new NotFoundException('유저가 이미 등록되어있음.');
+    const existedWorker = await this.cardMemberRepository.findOneBy({ userId: userId });
+    if (existedWorker) throw new ConflictException('유저가 이미 등록되어있음.');
     //카드 작업자 할당 = 카드 작업자 데이터 생성
-    const cardWorker = await this.cardMemeberRepository.save({
+    const cardWorker = await this.cardMemberRepository.save({
       cardId,
       userId,
     });
@@ -202,7 +203,7 @@ export class CardService {
   // 작업자 조회
   async findWorker(cardId: number, workerId: number) {
     // 카드에 맞는 해당 작업자가 없다면 false반환
-    const existedWorker = await this.cardMemeberRepository.findOneBy({
+    const existedWorker = await this.cardMemberRepository.findOneBy({
       cardId: cardId,
       userId: workerId,
     });
@@ -218,7 +219,10 @@ export class CardService {
   // 작업자 제거
   async deleteWorker(cardId: number, workerId: number) {
     //카드에 맞는 작업자가 있는지
-    const worker = await this.cardMemeberRepository.delete({
+    const findWorker = await this.findWorker(cardId, workerId);
+    if (!findWorker) throw new NotFoundException('해당 카드에 맞는 작업자가 없습니다.');
+
+    const worker = await this.cardMemberRepository.delete({
       cardId,
       userId: workerId,
     });
