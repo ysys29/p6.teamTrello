@@ -104,7 +104,7 @@ export class ListService {
     return updatedList.title;
   }
 
-  // 리스트 순서 변경 //인가 수정 해야함
+  // 리스트 순서 변경
   async reorderList(userId: number, listId: number, reorderListDto: ReorderListDto) {
     const { beforeId, afterId } = reorderListDto;
 
