@@ -5,7 +5,7 @@ import { UpdateCardDto } from './dto/update-card.dto';
 import { ApiTags, ApiBearerAuth } from '@nestjs/swagger';
 import { AuthGuard } from '@nestjs/passport';
 import { ReorderCardDto } from './dto/reorder-card.dto';
-@ApiTags('카드 정보')
+@ApiTags('8. 카드')
 @Controller('card')
 export class CardController {
   constructor(private readonly cardService: CardService) {}

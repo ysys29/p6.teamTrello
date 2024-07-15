@@ -18,7 +18,7 @@ import { UpdateBoardDto } from './dtos/update-board.dto';
 import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags, ApiQuery } from '@nestjs/swagger';
 import { AuthGuard } from '@nestjs/passport';
 
-@ApiTags('보드')
+@ApiTags('5. 보드')
 @Controller('boards')
 export class BoardController {
   constructor(private readonly boardService: BoardService) {}
