@@ -29,9 +29,21 @@ export class CommentController {
     };
   }
 
+  /**
+   * 댓글조회
+   *
+   * @returns
+   */
+  @ApiBearerAuth()
+  @UseGuards(AuthGuard('jwt'))
   @Get()
   async findAll() {
-    return await this.commentService.findAll();
+    const data = await this.commentService.findAll();
+    return {
+      statusCode: 200,
+      message: '댓글 조회에 성공했습니다.',
+      data: data,
+    };
   }
 
   @Get(':id')

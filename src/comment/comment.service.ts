@@ -31,8 +31,9 @@ export class CommentService {
     return newComment;
   }
 
-  findAll() {
-    return `This action returns all comment`;
+  async findAll() {
+    const data = await this.commentRepository.find({ select: ['cardId', 'id', 'comment'] });
+    return data;
   }
 
   findOne(id: number) {
