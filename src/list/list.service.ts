@@ -60,13 +60,16 @@ export class ListService {
     }
 
     // 해당 리스트 저장
-    await this.listRepository.save({
+    const newList = await this.listRepository.save({
       boardId,
       title,
       lexoRank: lexoRank.toString(),
     });
 
-    return true;
+    return {
+      id: newList.id,
+      title: newList.title,
+    };
   }
 
   // 리스트 상세 조회
@@ -77,7 +80,14 @@ export class ListService {
     //카드를 lexoRank를 기준으로 정렬(asc로)
     list.cards.sort((a, b) => a.lexoRank.localeCompare(b.lexoRank)); //localCompare: 문자열과 문자열을 비교
 
-    return list;
+    return {
+      id: list.id,
+      title: list.title,
+      cards: list.cards.map((card) => ({
+        title: card.title,
+        deadline: card.deadline,
+      })),
+    };
   }
 
   // 리스트 이름 수정
@@ -91,7 +101,7 @@ export class ListService {
       title: title,
     });
 
-    return updatedList;
+    return updatedList.title;
   }
 
   // 리스트 순서 변경 //인가 수정 해야함

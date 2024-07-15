@@ -89,7 +89,11 @@ export class InvitationService {
       where: { email: user.email },
     });
 
-    return invitations;
+    return invitations.map((invitation) => ({
+      id: invitation.id,
+      boardId: invitation.boardId,
+      status: invitation.status,
+    }));
   }
 
   // 내가 받은 초대의 상태 변경
