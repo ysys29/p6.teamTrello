@@ -246,29 +246,117 @@ describe('ListService test code', () => {
       });
     });
 
-    test('마지막으로 리스트 이동 성공', async () => {
-      // GIVEN
-      // WHEN
-      // THEN
-    });
-
     test('리스트 사이로 이동 성공', async () => {
       // GIVEN
+      const mockUserId = 1;
+      const mockListId = 1;
+      const mockBeforeId = 3;
+      const mockAfterId = 4;
+
+      const mockBeforeList = dummyLists[2];
+      const mockAfterList = dummyLists[3];
+      const mockList = { ...dummyLists[0], board: { id: 1 } };
+
+      const mockBeforeListLexoRank = LexoRank.parse(mockBeforeList.lexoRank);
+      const mockAfterListLexoRank = LexoRank.parse(mockAfterList.lexoRank);
+      const mockNewLexoRank = mockBeforeListLexoRank.between(mockAfterListLexoRank);
+
+      mockListRepository.findOne.mockResolvedValue(mockList);
+      mockBoardMemberRepository.findOne.mockResolvedValue(true);
+      mockListRepository.findOneBy.mockResolvedValueOnce(mockBeforeList).mockResolvedValueOnce(mockAfterList);
+      mockListRepository.save.mockResolvedValue({ ...mockList, lexoRank: mockNewLexoRank.toString() });
+
       // WHEN
+      const result = await listService.reorderList(mockUserId, mockListId, {
+        beforeId: mockBeforeId,
+        afterId: mockAfterId,
+      });
+
       // THEN
+      expect(result).toEqual(true);
+      expect(mockListRepository.findOneBy).toHaveBeenCalledWith({ id: mockBeforeId });
+      expect(mockListRepository.findOneBy).toHaveBeenCalledWith({ id: mockAfterId });
+      expect(mockListRepository.findOneBy).toHaveBeenCalledTimes(2);
+      expect(mockListRepository.save).toHaveBeenCalledTimes(1);
+      expect(mockListRepository.save).toHaveBeenCalledWith({
+        ...mockList,
+        lexoRank: mockNewLexoRank.toString(),
+      });
     });
 
-    // test('beforeId와 afterId 둘 다 입력 안했을 떄 에러', async () => {
-    //   // GIVEN
-    //   // WHEN
-    //   // THEN
-    // });
+    test('마지막으로 리스트 이동 성공', async () => {
+      // GIVEN
+      const mockUserId = 1;
+      const mockListId = 1;
+      const mockBeforeId = 5;
+      const mockBeforeList = dummyLists[4];
+      const mockList = { ...dummyLists[0], board: { id: 1 } };
+      const mockNewLexoRank = LexoRank.parse(mockBeforeList.lexoRank).genNext();
 
-    // test('id는 있는데 해당 아이디의 리스트가 없을 때 에러', async () => {
-    //   // GIVEN
-    //   // WHEN
-    //   // THEN
-    // });
+      mockListRepository.findOne.mockResolvedValue(mockList);
+      mockBoardMemberRepository.findOne.mockResolvedValue(true);
+      mockListRepository.findOneBy.mockResolvedValue(mockBeforeList);
+      mockListRepository.save.mockResolvedValue({ ...mockList, lexoRank: mockNewLexoRank.toString() });
+
+      // WHEN
+      const result = await listService.reorderList(mockUserId, mockListId, { beforeId: mockBeforeId });
+
+      // THEN
+      expect(result).toEqual(true);
+      expect(mockListRepository.findOneBy).toHaveBeenCalledWith({ id: mockBeforeId });
+      expect(mockListRepository.findOneBy).toHaveBeenCalledTimes(1);
+      expect(mockListRepository.save).toHaveBeenCalledTimes(1);
+      expect(mockListRepository.save).toHaveBeenCalledWith({
+        ...mockList,
+        lexoRank: mockNewLexoRank.toString(),
+      });
+    });
+
+    test('beforeId와 afterId 둘 다 입력 안했을 떄 에러', async () => {
+      // GIVEN
+      const mockUserId = 1;
+      const mockListId = 1;
+      const mockList = dummyListWithBoard;
+
+      mockListRepository.findOne.mockResolvedValue(mockList);
+      mockBoardMemberRepository.findOne.mockResolvedValue(true);
+
+      // WHEN
+      const result = listService.reorderList(mockUserId, mockListId, {});
+
+      // THEN
+      await expect(result).rejects.toThrow(
+        expect.objectContaining({
+          name: 'BadRequestException',
+          message: 'beforeId와 afterId 둘 중 하나는 입력해 주세요.',
+        }),
+      );
+      expect(mockListRepository.save).toHaveBeenCalledTimes(0);
+    });
+
+    test('id는 있는데 해당 아이디의 리스트가 없을 때 에러', async () => {
+      // GIVEN
+      const mockUserId = 1;
+      const mockListId = 1;
+      const mockBeforeId = 5;
+      const mockList = dummyListWithBoard;
+
+      mockListRepository.findOne.mockResolvedValue(mockList);
+      mockBoardMemberRepository.findOne.mockResolvedValue(true);
+      mockListRepository.findOneBy.mockResolvedValue(null);
+
+      // WHEN
+      const result = listService.reorderList(mockUserId, mockListId, { beforeId: mockBeforeId });
+
+      // THEN
+      await expect(result).rejects.toThrow(
+        expect.objectContaining({
+          name: 'BadRequestException',
+          message: '리스트가 변경되었으니 다시 호출해 주세요.',
+        }),
+      );
+      expect(mockListRepository.save).toHaveBeenCalledTimes(0);
+    });
   });
 
   // 리스트 삭제 메서드 테스트
