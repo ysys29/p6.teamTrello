@@ -63,10 +63,12 @@ export class UserService {
 
   // 회원 탈퇴하기
   async softDelete(id: number) {
-    const user = await this.findOneById(id);
+    const user = await this.userRepository.findOne({
+      where: { id },
+    });
 
     if (!user) {
-      throw new BadRequestException('사용자를 찾을 수 없습니다.');
+      throw new NotFoundException('사용자를 찾을 수 없습니다.');
     }
 
     await this.userRepository.softDelete({ id });
