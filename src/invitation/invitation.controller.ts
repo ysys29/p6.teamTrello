@@ -4,6 +4,7 @@ import { AuthGuard } from '@nestjs/passport';
 import { SendInvitationDto } from './dtos/send-invitation.dto';
 import { UpdateInvitationStatusDto } from './dtos/update-invitation-status.dto';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import { InvitationIdDto } from './dtos/invitation-id.dto';
 
 @ApiTags('보드 멤버 초대')
 @Controller('invitations')
@@ -60,14 +61,18 @@ export class InvitationController {
   @Patch(':invitationId')
   async changeInvitationStatus(
     @Request() req,
-    @Param('invitationId') invitationId: number,
+    @Param() invitationIdDto: InvitationIdDto,
     @Body() updateStatusDto: UpdateInvitationStatusDto,
   ) {
-    const data = await this.invitationService.changeInvitationStatus(req.user.id, invitationId, updateStatusDto);
+    const data = await this.invitationService.changeInvitationStatus(
+      req.user.id,
+      invitationIdDto.invitationId,
+      updateStatusDto,
+    );
 
     return {
       statusCode: HttpStatus.OK,
-      message: `${invitationId}번 초대의 상태를 변경했습니다`,
+      message: `${invitationIdDto.invitationId}번 초대의 상태를 변경했습니다`,
       data,
     };
   }
