@@ -1,4 +1,19 @@
-import { PartialType } from '@nestjs/swagger';
-import { CreateCardDto } from './create-card.dto';
+import { IsOptional, IsString, IsHexColor, IsNumber } from 'class-validator';
 
-export class UpdateCardDto extends PartialType(CreateCardDto) {}
+export class UpdateCardDto {
+  @IsOptional()
+  @IsNumber()
+  listId?: number;
+
+  @IsOptional({ message: '타이틀을 입력해 주세요.' })
+  @IsString()
+  title?: string;
+
+  @IsOptional()
+  @IsString()
+  content?: string;
+
+  @IsOptional()
+  @IsHexColor({ message: '올바른 색상 코드를 입력해 주세오' })
+  color?: string;
+}

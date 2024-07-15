@@ -30,7 +30,7 @@ export class CardMember {
   @UpdateDateColumn()
   updatedAt: Date;
 
-  @ManyToOne(() => Card, (card) => card.cardMembers)
+  @ManyToOne(() => Card, (card) => card.cardMembers, { onDelete: 'CASCADE' })
   card: Card;
 
   @ManyToOne(() => User, (user) => user.cardMembers)
