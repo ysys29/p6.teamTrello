@@ -17,6 +17,10 @@ export class SignUpDto extends PickType(User, ['email', 'password', 'nickname', 
   )
   passwordConfirm: string;
 
+  /**
+   * 토큰
+   * @example "token"
+   */
   @IsNotEmpty({ message: `토큰을 입력해 주세요.` })
   @IsString({ message: `토큰 형식에 맞지 않습니다.` })
   @Column()

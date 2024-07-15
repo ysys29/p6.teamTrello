@@ -6,7 +6,7 @@ import { UpdateInvitationStatusDto } from './dtos/update-invitation-status.dto';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { InvitationIdDto } from './dtos/invitation-id.dto';
 
-@ApiTags('보드 멤버 초대')
+@ApiTags('6. 보드 멤버 초대')
 @Controller('invitations')
 export class InvitationController {
   constructor(private readonly invitationService: InvitationService) {}

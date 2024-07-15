@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
+import { Injectable, NotFoundException, ConflictException } from '@nestjs/common';
 import { CreateCardDto } from './dto/create-card.dto';
 import { UpdateCardDto } from './dto/update-card.dto';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -7,11 +7,17 @@ import { Repository } from 'typeorm';
 import { ReorderCardDto } from './dto/reorder-card.dto';
 import { LexoRank } from 'lexorank';
 import { List } from 'src/list/entities/list.entity';
+import { User } from 'src/user/entities/user.entity';
+import { CardMember } from './entities/card-member.entity';
+import { CreateCardMemberDto } from './dto/create-card-member.dto';
+
 @Injectable()
 export class CardService {
   constructor(
     @InjectRepository(Card) private readonly cardRepository: Repository<Card>,
     @InjectRepository(List) private readonly listRepository: Repository<List>,
+    @InjectRepository(User) private readonly userRepository: Repository<User>,
+    @InjectRepository(CardMember) private readonly cardMemberRepository: Repository<CardMember>,
   ) {}
 
   async create(createCardDto: CreateCardDto) {
@@ -20,7 +26,7 @@ export class CardService {
     const existedCard = await this.cardRepository.findOneBy({
       title: title,
     });
-    if (existedCard) throw new BadRequestException('이미 사용중인 카드 이름입니다.');
+    if (existedCard) throw new ConflictException('이미 사용중인 카드 이름입니다.');
 
     // LexoRank값 생성
     let lexoRank: LexoRank;
@@ -65,23 +71,40 @@ export class CardService {
     // 카드를 가지고 있는지 여부 검사
     const card = await this.cardRepository.findOne({
       where: { id },
+      relations: ['cardMembers'],
     });
+
     if (!card) throw new NotFoundException('카드를 찾을 수 없습니다.');
+
     return card;
   }
 
   // 카드 수정
   async update(id: number, updateCardDto: UpdateCardDto) {
-    const { listId, title, content, color } = updateCardDto;
+    const { listId, title, content, color, deadline } = updateCardDto;
     // 카드를 가지고 있는지 여부 검사
-    const card = this.findOne(id);
-    if (!card) throw new NotFoundException('카드를 찾을 수 없습니다.');
-    const data = await this.cardRepository.save({
-      listId,
-      title,
-      content,
-      color,
-    });
+    const existedCard = this.findOne(id);
+    if (!existedCard) throw new NotFoundException('카드를 찾을 수 없습니다.');
+
+    // 해당 리스트가 있는지 여부 검사
+    const existedList = await this.listRepository.findOneBy({ id: listId });
+    if (!existedList) throw new NotFoundException('리스트를 찾을 수 없습니다.');
+
+    // 수정할 데이터 업데이트
+    // 리스트id, 제목, 내용, 색 중 1가지라도 있으면 수정이 된다.
+
+    // 업데이트할 데이터의 조건
+    const updateCondition = { id: id };
+    // 업데이트할 데이터의 값
+    const updateData: any = {
+      ...(listId !== null ? { listId } : {}),
+      ...(title !== null ? { title } : {}),
+      ...(content !== null ? { content } : {}),
+      ...(color !== null ? { color } : {}),
+      ...(deadline !== null ? { deadline } : {}),
+    };
+
+    const data = await this.cardRepository.update(updateCondition, updateData);
     return data;
   }
 
@@ -107,6 +130,7 @@ export class CardService {
 
     // 2. 해당 리스트가 없을때 false 반환
     const existedList = await this.listRepository.findOneBy({ id: ListId });
+    console.log(existedList);
     if (!existedList) throw new NotFoundException('해당 리스트가 없습니다.');
 
     // Id값으로 이동 했을때 전과 후의 카드 찾기
@@ -151,5 +175,57 @@ export class CardService {
       lexoRank: lexoRank.toString(),
     });
     return await this.findAll();
+  }
+
+  // 작업자 할당
+  async choiceWorker(cardId: number, createCardMeberDto: CreateCardMemberDto) {
+    const { userId } = createCardMeberDto;
+    // 카드아이디에 맞는 카드가 없다면
+    const existedCard = await this.cardRepository.findOneBy({ id: cardId });
+    if (!existedCard) throw new NotFoundException('카드 없음');
+
+    // 유저아이디에 맞는 유저가 없다면
+
+    const existedUser = await this.userRepository.findOneBy({ id: userId });
+    if (!existedUser) throw new NotFoundException('유저 없음');
+
+    // 유저가 이미 카드 작업자로 할당 되있다면 false반환
+    const existedWorker = await this.cardMemberRepository.findOneBy({ userId: userId });
+    if (existedWorker) throw new ConflictException('유저가 이미 등록되어있음.');
+    //카드 작업자 할당 = 카드 작업자 데이터 생성
+    const cardWorker = await this.cardMemberRepository.save({
+      cardId,
+      userId,
+    });
+    return cardWorker;
+  }
+
+  // 작업자 조회
+  async findWorker(cardId: number, workerId: number) {
+    // 카드에 맞는 해당 작업자가 없다면 false반환
+    const existedWorker = await this.cardMemberRepository.findOneBy({
+      cardId: cardId,
+      userId: workerId,
+    });
+    if (!existedWorker) throw new NotFoundException('해당 카드에 맞는 작업자가 없습니다.');
+    const worker = await this.userRepository.findOneBy({
+      id: workerId,
+    });
+    if (!worker) throw new NotFoundException('사용자 정보를 찾을 수 없습니다.');
+
+    return worker;
+  }
+
+  // 작업자 제거
+  async deleteWorker(cardId: number, workerId: number) {
+    //카드에 맞는 작업자가 있는지
+    const findWorker = await this.findWorker(cardId, workerId);
+    if (!findWorker) throw new NotFoundException('해당 카드에 맞는 작업자가 없습니다.');
+
+    const worker = await this.cardMemberRepository.delete({
+      cardId,
+      userId: workerId,
+    });
+    return worker;
   }
 }

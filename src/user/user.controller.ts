@@ -16,7 +16,7 @@ import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { UpdateUserDto } from './dtos/update-user.dto';
 import { SearchUserParamsDto } from './dtos/search-user.dto';
 
-@ApiTags('사용자')
+@ApiTags('4. 사용자')
 @Controller('users')
 export class UserController {
   constructor(private readonly userService: UserService) {}
@@ -87,8 +87,8 @@ export class UserController {
   @ApiBearerAuth()
   @UseGuards(AuthGuard('jwt'))
   @Get(':userId')
-  async findOneById(@Param() userId: SearchUserParamsDto) {
-    const data = await this.userService.findOneById(userId.userId);
+  async findOneById(@Param() searchUserParamsDto: SearchUserParamsDto) {
+    const data = await this.userService.findOneById(searchUserParamsDto.userId);
 
     return {
       statusCode: HttpStatus.OK,

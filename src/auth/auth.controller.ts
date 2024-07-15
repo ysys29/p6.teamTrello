@@ -5,7 +5,7 @@ import { ApiTags } from '@nestjs/swagger';
 import { AuthGuard } from '@nestjs/passport';
 import { SignInDto } from './dtos/sign-in.dto';
 
-@ApiTags('인증')
+@ApiTags('2. 인증')
 @Controller('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
