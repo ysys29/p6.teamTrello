@@ -5,6 +5,7 @@ import { ConfigService } from '@nestjs/config';
 import { User } from './entities/user.entity';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { BadRequestException, NotFoundException } from '@nestjs/common';
+import { UpdateUserDto } from './dtos/update-user.dto';
 
 type MockRepository<T = any> = Partial<Record<keyof Repository<T>, jest.Mock>>;
 type UserWithoutRelations = Omit<User, 'boards' | 'boardMembers' | 'cardMembers' | 'comments'>;
@@ -90,13 +91,66 @@ describe('UserService', () => {
   describe('update', () => {
     it('새 비밀번호와 새 비밀번호 확인이 서로 일치하지 않을 때, status:400, message: 새 비밀번호와 새 비밀번호 확인이 서로 일치하지 않습니다.', async () => {
       // Given
+      const id = 1;
+      const newPassword = 'Example2@';
+      const newPasswordConfirm = 'Example2@123';
+      const nickname = '재밌어요';
+      const imgUrl = '나에게테스트코드는살인이다';
+      const mockReturn = { message: '새 비밀번호와 새 비밀번호 확인이 서로 일치하지 않습니다.' };
+
       // When
+      await expect(userService.update(id, { newPassword, newPasswordConfirm, nickname, imgUrl })).rejects.toThrow(
+        new BadRequestException(mockReturn.message),
+      );
+
       // Then
+      expect(newPassword).not.toEqual(newPasswordConfirm);
+      expect(mockUserRepository.findOneBy).toHaveBeenCalledTimes(0);
+      expect(mockUserRepository.save).toHaveBeenCalledTimes(0);
     });
-    it('사용자 ID와 일치하는 사용자가 존재할 때, softDelete로 회원 탈퇴에 성공', async () => {
+    it('내 정보 (비밀번호, 닉네임, imgUrl) 수정', async () => {
       // Given
+      const id = 1;
+      const newPassword = 'Example2@';
+      const newPasswordConfirm = 'Example2@';
+      const nickname = '재밌어요';
+      const imgUrl = '나에게테스트코드는살인이다';
+      const hashedNewPassword = 'hashedNewPassword';
+      const mockUser: UserWithoutRelations = {
+        id: 1,
+        email: 'test@test.com',
+        password: 'password',
+        nickname: 'test',
+        imgUrl: 'testImgUrl',
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        deletedAt: null,
+      };
+      const mockUpdatedUser = {
+        id: 1,
+        email: 'test@test.com',
+        password: newPassword,
+        nickname: nickname,
+        imgUrl: imgUrl,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        deletedAt: null,
+      };
+      const mockReturn = delete mockUpdatedUser.password;
+
+      mockUserRepository.findOneById.mockResolvedValue(mockUser);
+      mockUserRepository.save.mockResolvedValue(mockUpdatedUser);
       // When
+      const result = await userService.update(id, { newPassword, newPasswordConfirm, nickname, imgUrl });
+
       // Then
+      expect(newPassword).toEqual(newPasswordConfirm);
+      expect(mockUserRepository.findOneBy).toHaveBeenCalledTimes(1);
+      expect(mockUserRepository.findOneBy).toHaveBeenCalledWith({ id });
+
+      expect(mockUserRepository.save).toHaveBeenCalledTimes(1);
+      expect(mockUserRepository.save).toHaveBeenCalledWith({ id });
+      expect(result).toEqual(mockReturn);
     });
   });
 
