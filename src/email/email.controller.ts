@@ -4,7 +4,7 @@ import { ApiTags } from '@nestjs/swagger';
 import { IsValidEmailDto } from './dtos/is-valid-email.dto';
 import { Cron } from '@nestjs/schedule';
 
-@ApiTags('이메일')
+@ApiTags('3. 이메일')
 @Controller('emails')
 export class EmailController {
   constructor(private readonly emailService: EmailService) {}

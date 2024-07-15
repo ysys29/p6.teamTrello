@@ -7,7 +7,7 @@ import { AuthGuard } from '@nestjs/passport';
 import { UpdateListDto } from './dtos/update-list.dto';
 import { ListIdDto } from './dtos/list-id.dto';
 
-@ApiTags('리스트')
+@ApiTags('7. 리스트')
 @Controller('lists')
 export class ListController {
   constructor(private readonly listService: ListService) {}
