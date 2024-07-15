@@ -216,5 +216,12 @@ export class CardService {
   }
 
   // 작업자 제거
-  async deleteWorker(cardId: number, workerId: number) {}
+  async deleteWorker(cardId: number, workerId: number) {
+    //카드에 맞는 작업자가 있는지
+    const worker = await this.cardMemeberRepository.delete({
+      cardId,
+      userId: workerId,
+    });
+    return worker;
+  }
 }
