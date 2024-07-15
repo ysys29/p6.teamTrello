@@ -24,26 +24,6 @@ export class BoardController {
   constructor(private readonly boardService: BoardService) {}
 
   /**
-   * 사용자가 속한 보드 조회
-   * @param req
-   * @returns
-   */
-  @ApiBearerAuth()
-  @UseGuards(AuthGuard('jwt'))
-  @ApiOperation({ summary: '사용자가 속한 보드 조회' })
-  @ApiResponse({ status: 200, description: '사용자가 속한 보드 조회에 성공했습니다.' })
-  @Get('joined')
-  async getUserBoards(@Request() req) {
-    const userId = req.user.id;
-    const data = await this.boardService.getUserBoards(Number(userId));
-    return {
-      statusCode: HttpStatus.OK,
-      message: '사용자가 속한 보드 조회에 성공했습니다.',
-      data,
-    };
-  }
-
-  /**
    * 제목으로 보드 검색
    * @param req
    * @param title
