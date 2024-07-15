@@ -44,16 +44,22 @@ export class Board {
   @DeleteDateColumn({ nullable: true })
   deletedAt: Date;
 
-  @ManyToOne((type) => User, (user) => user.boards)
+  @ManyToOne(() => User, (user) => user.boards)
   @JoinColumn({ name: 'owner_id' })
   user: User;
 
-  @OneToMany((type) => BoardMember, (boardMember) => boardMember.board)
+  @OneToMany(() => BoardMember, (boardMember) => boardMember.board, {
+    cascade: ['soft-remove'],
+  })
   boardMembers: BoardMember[];
 
-  @OneToMany((type) => BoardInvitation, (boardInvitation) => boardInvitation.board)
+  @OneToMany(() => BoardInvitation, (boardInvitation) => boardInvitation.board, {
+    cascade: ['soft-remove'],
+  })
   boardInvitations: BoardInvitation[];
 
-  @OneToMany((type) => List, (list) => list.board)
+  @OneToMany(() => List, (list) => list.board, {
+    cascade: ['soft-remove'],
+  })
   lists: List[];
 }

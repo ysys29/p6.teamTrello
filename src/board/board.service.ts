@@ -1,7 +1,7 @@
 import { Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { CreateBoardDto } from './dtos/create-board.dto';
 import { UpdateBoardDto } from './dtos/update-board.dto';
-import { Repository } from 'typeorm';
+import { In, Like, Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Board } from './entities/board.entity';
 import { BoardMember } from './entities/board-member.entity';
@@ -32,20 +32,18 @@ export class BoardService {
   }
 
   // 보드 상세 조회
-  async findOne(id: number, userId: number): Promise<Board> {
-    // 주어진 ID로 보드 객체를 조회
+  async findOne(id: number, userId: number): Promise<any> {
+    // 반환 타입을 any로 변경
     const board = await this.boardRepository.findOne({
       where: { id },
-      relations: ['user', 'boardMembers', 'lists'],
-      // 보드 멤버들과 리스트들도 받아옴
+      relations: ['boardMembers', 'lists'],
+      select: ['id', 'title', 'description', 'color', 'createdAt', 'updatedAt'],
     });
 
-    // 보드가 존재하지 않으면 에러 메시지 출력
     if (!board) {
       throw new NotFoundException(`존재하지 않는 보드입니다.`);
     }
 
-    // 사용자가 보드 멤버인지 확인
     const isMember = await this.boardMemberRepository.findOne({
       where: { boardId: id, userId },
     });
@@ -54,7 +52,21 @@ export class BoardService {
       throw new UnauthorizedException('해당 보드에 접근할 권한이 없습니다.');
     }
 
-    return board;
+    const response = {
+      id: board.id,
+      title: board.title,
+      description: board.description,
+      color: board.color,
+      createdAt: board.createdAt,
+      updatedAt: board.updatedAt,
+      boardMembers: board.boardMembers.map((member) => ({
+        id: member.id,
+        userId: member.userId,
+      })),
+      lists: board.lists,
+    };
+
+    return response;
   }
 
   // 보드 수정
@@ -79,8 +91,8 @@ export class BoardService {
     return this.boardRepository.save(board);
   }
 
-  // 보드 삭제
-  async remove(id: number, userId: number): Promise<void> {
+  // 보드 소프트 삭제
+  async softDelete(id: number, userId: number): Promise<void> {
     const board = await this.boardRepository.findOne({ where: { id } });
 
     if (!board) {
@@ -92,7 +104,7 @@ export class BoardService {
       throw new UnauthorizedException('보드를 삭제할 권한이 없습니다.');
     }
 
-    await this.boardRepository.remove(board);
+    await this.boardRepository.softRemove(board);
   }
 
   // 보드 멤버 조회
@@ -118,7 +130,24 @@ export class BoardService {
       where: { userId },
       relations: ['board'],
     });
-
     return boardMembers.map((member) => member.board);
+  }
+
+  // 제목별로 보드 검색
+  async searchBoardsByTitle(userId: number, title: string): Promise<Board[]> {
+    const boardMembers = await this.boardMemberRepository.find({
+      where: { userId },
+      relations: ['board'],
+    });
+
+    // board가 null이 아닌 경우만 필터링
+    const boardIds = boardMembers.filter((member) => member.board !== null).map((member) => member.board.id);
+
+    return this.boardRepository.find({
+      where: {
+        id: In(boardIds),
+        title: Like(`%${title}%`),
+      },
+    });
   }
 }

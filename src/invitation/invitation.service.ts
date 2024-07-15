@@ -15,6 +15,7 @@ import { BoardMember } from 'src/board/entities/board-member.entity';
 import { User } from 'src/user/entities/user.entity';
 import { InvitationStatus } from './types/invitation-status.type';
 import { UpdateInvitationStatusDto } from './dtos/update-invitation-status.dto';
+import { EmailService } from 'src/email/email.service';
 
 @Injectable()
 export class InvitationService {
@@ -22,9 +23,10 @@ export class InvitationService {
     @InjectRepository(BoardInvitation)
     private readonly boardInvitationRepository: Repository<BoardInvitation>,
     @InjectRepository(BoardMember)
-    private readonly boardMemberRepostitory: Repository<BoardMember>,
+    private readonly boardMemberRepository: Repository<BoardMember>,
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
+    private readonly emailService: EmailService,
     private readonly dataSource: DataSource,
   ) {}
 
@@ -32,7 +34,7 @@ export class InvitationService {
   async sendInvitation(userId: number, sendInvitationDto: SendInvitationDto) {
     const { boardId, email } = sendInvitationDto;
 
-    const isAvailableMember = await this.boardMemberRepostitory.findOne({
+    const isAvailableMember = await this.boardMemberRepository.findOne({
       where: { boardId, userId },
     });
 
@@ -43,17 +45,15 @@ export class InvitationService {
     // 해당 이메일의 유저가 존재하는지 찾기
     const user = await this.userRepository.findOneBy({ email });
 
-    if (!user) {
-      throw new NotFoundException('해당하는 이메일의 유저가 존재하지 않습니다.');
-    }
+    if (user) {
+      // 회원가입 되어있고, 이미 보드에 존재하는 멤버면 에러
+      const existingUser = await this.boardMemberRepository.findOne({
+        where: { boardId, userId: user.id },
+      });
 
-    // 이미 보드에 존재하는 멤버면 에러
-    const existingUser = await this.boardMemberRepostitory.findOne({
-      where: { boardId, userId: user.id },
-    });
-
-    if (existingUser) {
-      throw new ConflictException('이미 보드에 존재하는 멤버입니다.');
+      if (existingUser) {
+        throw new ConflictException('이미 보드에 존재하는 멤버입니다.');
+      }
     }
 
     // 이미 초대해서, invited 상태인 유저면 에러
@@ -63,6 +63,11 @@ export class InvitationService {
 
     if (existingInvitation) {
       throw new ConflictException('이미 초대한 멤버입니다. 수락을 기다려 주세요.');
+    }
+
+    // 초대 기록이 없고, 가입하지 않은 유저라면 메일 보내기
+    if (!user) {
+      this.emailService.sendEmail({ email, boardId });
     }
 
     // 초대 저장하기
@@ -84,7 +89,11 @@ export class InvitationService {
       where: { email: user.email },
     });
 
-    return invitations;
+    return invitations.map((invitation) => ({
+      id: invitation.id,
+      boardId: invitation.boardId,
+      status: invitation.status,
+    }));
   }
 
   // 내가 받은 초대의 상태 변경
@@ -123,7 +132,7 @@ export class InvitationService {
 
       if (status === InvitationStatus.ACCEPTED) {
         // 보드 멤버에 해당 유저 추가
-        const boardMember = this.boardMemberRepostitory.create({ boardId: invitation.boardId, userId });
+        const boardMember = this.boardMemberRepository.create({ boardId: invitation.boardId, userId });
         await queryRunner.manager.save(BoardMember, boardMember);
       }
 

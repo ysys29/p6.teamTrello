@@ -71,7 +71,7 @@ export class Card {
   @JoinColumn({ name: 'listId' })
   list: List;
 
-  @OneToMany(() => CardMember, (cardmember) => cardmember.card)
+  @OneToMany(() => CardMember, (cardMember) => cardMember.card)
   cardMembers: CardMember[];
 
   @OneToMany(() => Comment, (comment) => comment.card)

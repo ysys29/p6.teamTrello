@@ -1,4 +1,4 @@
-import { IsOptional, IsString, IsHexColor, IsNumber } from 'class-validator';
+import { IsString, IsHexColor, IsNumber } from 'class-validator';
 
 export class CreateCardDto {
   @IsNumber()

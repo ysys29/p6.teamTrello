@@ -1,5 +1,14 @@
 import { User } from 'src/user/entities/user.entity';
-import { Column, CreateDateColumn, Entity, ManyToOne, PrimaryGeneratedColumn, Unique, UpdateDateColumn } from 'typeorm';
+import {
+  Column,
+  CreateDateColumn,
+  Entity,
+  JoinColumn,
+  ManyToOne,
+  PrimaryGeneratedColumn,
+  Unique,
+  UpdateDateColumn,
+} from 'typeorm';
 import { Board } from './board.entity';
 import { JoinColumn } from 'typeorm';
 
@@ -22,10 +31,8 @@ export class BoardMember {
   updatedAt: Date;
 
   @ManyToOne((type) => User, (user) => user.boardMembers)
-  @JoinColumn({ name: 'user_id' })
   user: User;
 
   @ManyToOne((type) => Board, (board) => board.boardMembers)
-  @JoinColumn({ name: 'board_id' })
   board: Board;
 }

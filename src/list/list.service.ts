@@ -8,6 +8,7 @@ import { BoardMember } from 'src/board/entities/board-member.entity';
 import { ReorderListDto } from './dtos/reorder-list.dto';
 import { ValidateListAccess } from './types/validate-list-access.type';
 import { CreateListDto } from './dtos/create-list.dto';
+import { UpdateListDto } from './dtos/update-list.dto';
 
 @Injectable()
 export class ListService {
@@ -59,13 +60,16 @@ export class ListService {
     }
 
     // 해당 리스트 저장
-    await this.listRepository.save({
+    const newList = await this.listRepository.save({
       boardId,
       title,
       lexoRank: lexoRank.toString(),
     });
 
-    return true;
+    return {
+      id: newList.id,
+      title: newList.title,
+    };
   }
 
   // 리스트 상세 조회
@@ -76,14 +80,18 @@ export class ListService {
     //카드를 lexoRank를 기준으로 정렬(asc로)
     list.cards.sort((a, b) => a.lexoRank.localeCompare(b.lexoRank)); //localCompare: 문자열과 문자열을 비교
 
-    return list;
+    return {
+      id: list.id,
+      title: list.title,
+      cards: list.cards.map((card) => ({
+        title: card.title,
+        deadline: card.deadline,
+      })),
+    };
   }
 
   // 리스트 이름 수정
-  async updateListTitle(userId: number, listId: number, title: string) {
-    if (!title) {
-      throw new BadRequestException('리스트 이름을 입력해 주세요.');
-    }
+  async updateListTitle(userId: number, listId: number, { title }: UpdateListDto) {
     // 리스트 접근 권한 체크
     const list = await this.validateListAccess({ userId, listId });
 
@@ -93,7 +101,7 @@ export class ListService {
       title: title,
     });
 
-    return updatedList;
+    return updatedList.title;
   }
 
   // 리스트 순서 변경 //인가 수정 해야함
@@ -147,16 +155,6 @@ export class ListService {
     await this.listRepository.softDelete({ id: listId });
 
     return true;
-  }
-
-  // 리스트 목록 조회 // 리스트 순서 변경 확인용
-  async getAllLists(boardId: number) {
-    const lists = await this.listRepository.find({
-      where: { boardId },
-      order: { lexoRank: 'ASC' },
-    });
-
-    return lists;
   }
 
   // 리스트 접근 권한 체크
