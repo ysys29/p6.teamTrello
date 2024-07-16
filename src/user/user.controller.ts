@@ -30,7 +30,7 @@ export class UserController {
   @UseGuards(AuthGuard('jwt'))
   @Get('/me')
   async findOne(@Request() req) {
-    const data = await this.userService.findOneById(req.user.id);
+    const data = await this.userService.findMe(req.user.id);
 
     return {
       statusCode: HttpStatus.OK,
@@ -71,7 +71,7 @@ export class UserController {
   @UseGuards(AuthGuard('jwt'))
   @Delete('/me')
   async remove(@Request() req) {
-    this.userService.softDelete(req.user.id);
+    await this.userService.softDelete(req.user.id);
 
     return {
       statusCode: HttpStatus.OK,

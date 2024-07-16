@@ -37,7 +37,7 @@ export class AuthService {
     }
 
     // 해당 email로 인증 메일을 보낸 적이 있는 지 확인.
-    const existedEmail = await this.emailService.findEmail({ email });
+    const existedEmail = await this.emailService.findEmailByToken({ token });
     if (!existedEmail) {
       throw new BadRequestException('인증 이메일을 발송한 기록이 없습니다.');
     }
