@@ -68,7 +68,6 @@ export class Card {
   deletedAt: Date;
 
   @ManyToOne(() => List, (list) => list.cards)
-  @JoinColumn({ name: 'listId' })
   list: List;
 
   @OneToMany(() => CardMember, (cardMember) => cardMember.card)
