@@ -5,15 +5,12 @@ import { Comment } from './entities/comment.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Card } from 'src/card/entities/card.entity';
-import { User } from 'src/user/entities/user.entity';
-import { SearchCommentDto } from './dto/search-comment.dto';
 
 @Injectable()
 export class CommentService {
   constructor(
     @InjectRepository(Comment) private readonly commentRepository: Repository<Comment>,
     @InjectRepository(Card) private readonly cardRepository: Repository<Card>,
-    @InjectRepository(User) private readonly userRepository: Repository<User>,
   ) {}
   async create(userId: number, createCommentDto: CreateCommentDto) {
     const { cardId, comment } = createCommentDto;
@@ -30,11 +27,6 @@ export class CommentService {
     });
 
     return newComment;
-  }
-
-  async findMany(cardId: number) {
-    const data = await this.commentRepository.find({ where: { cardId: cardId }, select: ['cardId', 'comment'] });
-    return data;
   }
 
   async update(id: number, userId: number, updateCommentDto: UpdateCommentDto) {
@@ -64,12 +56,10 @@ export class CommentService {
     // 내가 작성한 댓글인지? 아니라면 삭제 안되게
     const { cardId } = SearchCommentDto;
     const isCardExist = await this.commentRepository.findOneBy({ id: cardId });
-    console.log(isCardExist);
     if (!isCardExist) {
       throw new NotFoundException('해당하는 카드가 없습니다.');
     }
     const existedComment = await this.commentRepository.findOneBy({ id });
-    console.log(existedComment);
     if (!existedComment || id !== existedComment.id) {
       throw new NotFoundException('해당하는 댓글이 없습니다.');
     } else if (userId !== existedComment.userId) {
