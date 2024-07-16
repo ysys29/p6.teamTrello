@@ -10,6 +10,7 @@ export class CreateCardDto {
   listId: number;
 
   /**
+   * @example 튜터님께 여쭤보기
    * 제목
    * @example "title?"
    */
@@ -18,6 +19,7 @@ export class CreateCardDto {
   title: string;
 
   /**
+   * @example 뭐라고 여쭤보지
    * 설명
    * @example "description?"
    */
@@ -26,6 +28,7 @@ export class CreateCardDto {
   content: string;
 
   /**
+   * @example #ffffff
    * 색상
    * @example "#FFFFFF"
    */
