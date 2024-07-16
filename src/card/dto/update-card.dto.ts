@@ -2,13 +2,6 @@ import { IsOptional, IsString, IsHexColor, IsNumber, IsDate } from 'class-valida
 import { Type } from 'class-transformer';
 export class UpdateCardDto {
   /**
-   * @example 1
-   */
-  @IsOptional()
-  @IsNumber()
-  listId?: number;
-
-  /**
    * @example 튜터님께 여쭤보기
    */
   @IsOptional({ message: '타이틀을 입력해 주세요.' })

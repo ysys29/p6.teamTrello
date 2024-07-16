@@ -81,23 +81,18 @@ export class CardService {
 
   // 카드 수정
   async update(id: number, updateCardDto: UpdateCardDto) {
-    const { listId, title, content, color, deadline } = updateCardDto;
+    const { title, content, color, deadline } = updateCardDto;
     // 카드를 가지고 있는지 여부 검사
     const existedCard = this.findOne(id);
     if (!existedCard) throw new NotFoundException('카드를 찾을 수 없습니다.');
 
-    // 해당 리스트가 있는지 여부 검사
-    const existedList = await this.listRepository.findOneBy({ id: listId });
-    if (!existedList) throw new NotFoundException('리스트를 찾을 수 없습니다.');
-
     // 수정할 데이터 업데이트
-    // 리스트id, 제목, 내용, 색 중 1가지라도 있으면 수정이 된다.
+    // 제목, 내용, 색 중 1가지라도 있으면 수정이 된다.
 
     // 업데이트할 데이터의 조건
     const updateCondition = { id: id };
     // 업데이트할 데이터의 값
     const updateData: any = {
-      ...(listId !== null ? { listId } : {}),
       ...(title !== null ? { title } : {}),
       ...(content !== null ? { content } : {}),
       ...(color !== null ? { color } : {}),
