@@ -196,26 +196,13 @@ export class CardService {
     return cardWorker;
   }
 
-  // 작업자 조회
-  async findWorker(cardId: number, workerId: number) {
-    // 카드에 맞는 해당 작업자가 없다면 false반환
-    const existedWorker = await this.cardMemberRepository.findOneBy({
-      cardId: cardId,
-      userId: workerId,
-    });
-    if (!existedWorker) throw new NotFoundException('해당 카드에 맞는 작업자가 없습니다.');
-    const worker = await this.userRepository.findOneBy({
-      id: workerId,
-    });
-    if (!worker) throw new NotFoundException('사용자 정보를 찾을 수 없습니다.');
-
-    return worker;
-  }
-
   // 작업자 제거
   async deleteWorker(cardId: number, workerId: number) {
     //카드에 맞는 작업자가 있는지
-    const findWorker = await this.findWorker(cardId, workerId);
+    const findWorker = await this.cardMemberRepository.findOneBy({
+      cardId: cardId,
+      userId: workerId,
+    });
     if (!findWorker) throw new NotFoundException('해당 카드에 맞는 작업자가 없습니다.');
 
     const worker = await this.cardMemberRepository.delete({
