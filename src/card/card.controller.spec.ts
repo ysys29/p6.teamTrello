@@ -3,7 +3,7 @@ import { CardController } from './card.controller';
 import { CardService } from './card.service';
 
 describe('CardController', () => {
-  let controller: CardController;
+  let cardcontroller: CardController;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -11,10 +11,18 @@ describe('CardController', () => {
       providers: [CardService],
     }).compile();
 
-    controller = module.get<CardController>(CardController);
+    cardcontroller = module.get<CardController>(CardController);
   });
 
   it('should be defined', () => {
-    expect(controller).toBeDefined();
+    expect(cardcontroller).toBeDefined();
+  });
+
+  describe('findOne', () => {
+    it('findOne test', async () => {
+      // Given
+      // When
+      // Then
+    });
   });
 });

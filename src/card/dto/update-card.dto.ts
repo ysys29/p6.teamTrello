@@ -1,33 +1,22 @@
-import { IsOptional, IsString, IsHexColor, IsNumber, IsDate } from 'class-validator';
+import { IsOptional, IsString, IsHexColor, IsDate } from 'class-validator';
 import { Type } from 'class-transformer';
 export class UpdateCardDto {
   /**
-   * 리스트 ID
-   * @example 1
+   * @example 튜터님께 여쭤보기
    */
-  @IsOptional()
-  @IsNumber()
-  listId?: number;
-
-  /**
-   * 제목
-   * @example "title?"
-   */
-  @IsOptional({ message: '제목을 입력해 주세요.' })
+  @IsOptional({ message: '타이틀을 입력해 주세요.' })
   @IsString()
   title?: string;
 
   /**
-   * 내용
-   * @example "content?"
+   * @example 뭐라고 여쭤보지
    */
   @IsOptional()
   @IsString()
   content?: string;
 
   /**
-   * 색상
-   * @example "#FFFFFF"
+   * @example #ffffff
    */
   @IsOptional()
   @IsHexColor({ message: '올바른 색상 코드를 입력해 주세오' })

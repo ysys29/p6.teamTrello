@@ -17,5 +17,5 @@ export class ReorderCardDto {
    * @example 1
    */
   @IsNumber()
-  ListId: number;
+  listId: number;
 }
