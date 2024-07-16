@@ -100,9 +100,9 @@ export class EmailService {
   }
 
   // 메일 보낸 기록 검색하기
-  async findEmail({ email }: { email: string }) {
+  async findEmailByToken({ token }: { token: string }) {
     const isExistedEmail = await this.emailRepository.findOne({
-      where: { email },
+      where: { token },
     });
     if (!isExistedEmail) {
       throw new BadRequestException('이메일 인증을 보낸 기록이 없습니다.');
