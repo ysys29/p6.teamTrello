@@ -29,22 +29,6 @@ export class CardController {
       data,
     };
   }
-  /**
-   * 카드 목록 조회
-   * @returns
-   */
-
-  @ApiBearerAuth()
-  @UseGuards(AuthGuard('jwt'))
-  @Get()
-  async findAll() {
-    const data = await this.cardService.findAll();
-    return {
-      statusCode: HttpStatus.OK,
-      message: '카드 목록 조회에 성공했습니다.',
-      data,
-    };
-  }
 
   /**
    * 카드 상세 조회

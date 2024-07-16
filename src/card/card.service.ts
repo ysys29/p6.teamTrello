@@ -56,16 +56,7 @@ export class CardService {
     });
     return data;
   }
-  // 카드 목록 조회
-  async findAll() {
-    const cards = await this.cardRepository.find({
-      select: ['id', 'listId', 'title', 'content', 'color', 'deadline', 'lexoRank'],
-      order: {
-        lexoRank: 'DESC',
-      },
-    });
-    return cards;
-  }
+
   // 카드 상세 조회
   async findOne(id: number) {
     // 카드를 가지고 있는지 여부 검사
