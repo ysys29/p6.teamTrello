@@ -8,7 +8,6 @@ import {
   OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
-  JoinColumn,
 } from 'typeorm';
 import { CardMember } from './card-member.entity';
 import { Comment } from '../../comment/entities/comment.entity';
