@@ -22,12 +22,15 @@ const configService = {
   get: jest.fn(),
 };
 
-describe('UserService', () => {
+describe('UserService test', () => {
   let userService: UserService;
   let mockUserRepository: MockRepository<User>;
 
   beforeEach(async () => {
+    jest.clearAllMocks();
     jest.resetAllMocks();
+    jest.restoreAllMocks();
+
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         UserService,
@@ -71,7 +74,16 @@ describe('UserService', () => {
         nickname: 'test',
         imgUrl: 'testImgUrl',
         deletedAt: null,
-        boardMembers: [],
+        boardMembers: [
+          {
+            id: 1,
+            boardId: 2,
+          },
+          {
+            id: 2,
+            boardId: 3,
+          },
+        ],
       };
       mockUserRepository.findOne.mockResolvedValue(mockUser);
 
@@ -84,7 +96,17 @@ describe('UserService', () => {
         where: { id: userId },
         relations: ['boardMembers'],
       });
-      expect(result).toEqual(mockUser);
+      expect(result).toEqual({
+        id: mockUser.id,
+        email: mockUser.email,
+        nickname: mockUser.nickname,
+        imgUrl: mockUser.imgUrl,
+        deletedAt: mockUser.deletedAt,
+        boardMembers: mockUser.boardMembers.map((boardMember) => ({
+          id: boardMember.id,
+          boardId: boardMember.boardId,
+        })),
+      });
     });
   });
 
