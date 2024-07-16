@@ -6,6 +6,7 @@ import { BoardMember } from './entities/board-member.entity';
 import { List } from '../list/entities/list.entity';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { CreateBoardDto } from './dtos/create-board.dto';
+import { UpdateBoardDto } from './dtos/update-board.dto';
 
 type MockRepository<T = any> = Partial<Record<keyof Repository<T>, jest.Mock>>;
 
@@ -152,6 +153,74 @@ describe('BoardService', () => {
         where: { boardId: mockBoard.id },
         order: { lexoRank: 'ASC' },
       });
+    });
+  });
+
+  // 보드 수정 메서드 테스트
+  describe('update', () => {
+    it('존재하지 않는 보드일 때 NotFoundException을 던져야 함', async () => {
+      // Given
+      const boardId = 1;
+      const userId = 1;
+      const updateBoardDto: UpdateBoardDto = { title: 'Updated Board Title' };
+
+      boardRepository.findOne.mockResolvedValue(null);
+
+      // When
+      const updateBoard = service.update(boardId, updateBoardDto, userId);
+
+      // Then
+      await expect(updateBoard).rejects.toThrow(
+        expect.objectContaining({
+          name: 'NotFoundException',
+          message: '존재하지 않는 보드입니다.',
+        }),
+      );
+      expect(boardRepository.findOne).toHaveBeenCalledWith({ where: { id: boardId } });
+      expect(boardRepository.save).toHaveBeenCalledTimes(0);
+    });
+
+    it('보드의 소유자가 아닐 때 UnauthorizedException을 던져야 함', async () => {
+      // Given
+      const boardId = 1;
+      const userId = 1;
+      const nonOwnerId = 2; // 소유자가 아닌 다른 사용자 ID
+      const updateBoardDto: UpdateBoardDto = { title: 'Updated Board Title' };
+      const mockBoard = { id: boardId, ownerId: nonOwnerId };
+
+      boardRepository.findOne.mockResolvedValue(mockBoard);
+
+      // When
+      const updateBoard = service.update(boardId, updateBoardDto, userId);
+
+      // Then
+      await expect(updateBoard).rejects.toThrow(
+        expect.objectContaining({
+          name: 'UnauthorizedException',
+          message: '보드를 수정할 권한이 없습니다.',
+        }),
+      );
+      expect(boardRepository.findOne).toHaveBeenCalledWith({ where: { id: boardId } });
+      expect(boardRepository.save).toHaveBeenCalledTimes(0);
+    });
+
+    it('보드 수정 성공', async () => {
+      // Given
+      const boardId = 1;
+      const userId = 1;
+      const updateBoardDto: UpdateBoardDto = { title: 'Updated Board Title' };
+      const mockBoard = { id: boardId, ownerId: userId, title: 'Old Board Title' };
+
+      boardRepository.findOne.mockResolvedValue(mockBoard);
+      boardRepository.save.mockResolvedValue({ ...mockBoard, ...updateBoardDto });
+
+      // When
+      const updatedBoard = await service.update(boardId, updateBoardDto, userId);
+
+      // Then
+      expect(boardRepository.findOne).toHaveBeenCalledWith({ where: { id: boardId } });
+      expect(boardRepository.save).toHaveBeenCalledWith({ ...mockBoard, ...updateBoardDto });
+      expect(updatedBoard).toEqual({ ...mockBoard, ...updateBoardDto });
     });
   });
 });
