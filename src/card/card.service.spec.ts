@@ -75,7 +75,7 @@ describe('CardService test code', () => {
     it('해당하는 카드가 없을 때 에러', async () => {
       // GIVEN
       const mockCardId = 1;
-      mockCardRepository.findOneBy.mockResolvedValue(null);
+      mockCardRepository.findOne.mockResolvedValue(null);
       // WHEN
       const card = cardService.findOne(mockCardId);
       // THEN
@@ -87,7 +87,7 @@ describe('CardService test code', () => {
       );
       expect(mockCardRepository.findOne).toHaveBeenCalledWith({
         where: { id: mockCardId },
-        relations: ['cardMembers'],
+        relations: ['cardMembers', 'comments'],
       });
     });
   });
@@ -123,7 +123,7 @@ describe('CardService test code', () => {
 
     expect(mockCardRepository.findOne).toHaveBeenCalledWith({
       where: { id: mockCardId },
-      relations: ['cardMembers'],
+      relations: ['cardMembers', 'comments'],
     });
   });
 
@@ -143,17 +143,53 @@ describe('CardService test code', () => {
         }),
       );
     });
-    it('카드 삭제 성공', async () => {
+  });
+  it('카드 삭제 성공', async () => {
+    //GIVEN
+    const mockCardId = 1;
+    const mockCard = dummyCardJoinCardMmber;
+    mockCardRepository.findOne.mockResolvedValue(mockCard);
+    //WHEN
+    const result = await cardService.remove(mockCardId);
+    //THEN
+    expect(mockCardRepository.findOne).toHaveBeenCalledWith({
+      where: { id: mockCardId },
+      relations: ['cardMembers', 'comments'],
+    });
+    expect(mockCardRepository.delete).toHaveBeenCalledTimes(1);
+    expect(mockCardRepository.delete).toHaveBeenCalledWith({ id: mockCardId });
+  });
+
+  // 카드 수정 메서드 테스트
+  describe('update method', () => {
+    it('해당하는 카드가 없을 때 에러', async () => {
       // GIVEN
       const mockCardId = 1;
-      const mockCard = dummyCardJoinCardMmber;
-      mockCardRepository.findOneBy.mockResolvedValue(mockCard);
+      mockCardRepository.findOneBy.mockResolvedValue(null);
       // WHEN
-      //cardService.delete(mockCardId);
+      const card = cardService.findOne(mockCardId);
       // THEN
-      expect(mockCardRepository.delete).toHaveBeenCalledWith({
-        id: mockCardId,
-      });
+      await expect(card).rejects.toThrow(
+        expect.objectContaining({
+          name: 'NotFoundException',
+          message: '카드를 찾을 수 없습니다.',
+        }),
+      );
     });
+  });
+  it('카드 수정 성공', async () => {
+    //GIVEN
+    const mockCardId = 1;
+    const mockCard = dummyCardJoinCardMmber;
+    const updateCondition = { id: mockCardId };
+    const mockUpdateTitle = { title: 'Update Card Title' };
+
+    mockCardRepository.findOne.mockResolvedValue(mockCard);
+    mockCardRepository.save.mockResolvedValue({ ...mockCard, title: mockUpdateTitle });
+    //WHEN
+    const updatedCard = await cardService.update(mockCardId, mockUpdateTitle);
+    //THEN
+    expect(mockCardRepository.update).toHaveBeenCalledTimes(1);
+    expect(mockCardRepository.update).toHaveBeenCalledWith(updateCondition, mockUpdateTitle);
   });
 });
