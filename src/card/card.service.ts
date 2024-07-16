@@ -169,7 +169,17 @@ export class CardService {
       listId: listId,
       lexoRank: lexoRank.toString(),
     });
-    return await this.findAll();
+    const list = await this.listRepository.findOne({
+      where: { id: listId },
+      relations: ['cards'],
+      order: {
+        cards: {
+          lexoRank: 'ASC',
+        },
+      },
+    });
+
+    return list;
   }
 
   // 작업자 할당
