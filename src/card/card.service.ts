@@ -110,8 +110,8 @@ export class CardService {
     // 유효성 검사
     const { beforeId, afterId, listId } = reorderCardDto;
     // 1. beforeId, afterId 중 최소 1개는 있어야 한다. 둘 다 없다면 false 반환
-    // beforecard가 Null 이라면 첫번재 순서
-    // aftercard가 Null 이라면 마지막 순서
+    // beforeCard가 Null 이라면 첫번재 순서
+    // afterCard가 Null 이라면 마지막 순서
     if (!beforeId && !afterId) throw new NotFoundException('beforeId, afterId 중 1개를 입력해주세요');
 
     // 2. 해당 리스트가 없을때 false 반환

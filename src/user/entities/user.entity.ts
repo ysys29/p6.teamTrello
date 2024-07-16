@@ -1,4 +1,4 @@
-import { IsEmail, IsNotEmpty, IsNumber, IsString, IsStrongPassword } from 'class-validator';
+import { IsEmail, IsNotEmpty, IsString, IsStrongPassword } from 'class-validator';
 import { BoardMember } from 'src/board/entities/board-member.entity';
 import { Board } from 'src/board/entities/board.entity';
 import { CardMember } from 'src/card/entities/card-member.entity';

@@ -1,15 +1,7 @@
-import { IsNotEmpty, IsNumber } from 'class-validator';
+import { IsNotEmpty, IsNumber, IsString } from 'class-validator';
 import { Card } from 'src/card/entities/card.entity';
 import { User } from 'src/user/entities/user.entity';
-import {
-  Column,
-  CreateDateColumn,
-  Entity,
-  JoinColumn,
-  ManyToOne,
-  PrimaryGeneratedColumn,
-  UpdateDateColumn,
-} from 'typeorm';
+import { Column, CreateDateColumn, Entity, ManyToOne, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
 
 @Entity('comments')
 export class Comment {
@@ -20,7 +12,7 @@ export class Comment {
    * @example "1"
    */
   @IsNumber()
-  @IsNotEmpty({ message: '댓글 작성할 카드Id를 입력해주세요.' })
+  @IsNotEmpty({ message: '댓글 작성할 카드ID를 입력해 주세요.' })
   @Column()
   cardId: number;
 
@@ -32,7 +24,8 @@ export class Comment {
    * 내용
    * @example "내용내용"
    */
-  @IsNotEmpty({ message: '댓글을 입력해주세요' })
+  @IsNotEmpty({ message: '댓글을 입력해 주세요' })
+  @IsString({ message: '댓글 형식에 맞게 입력해 주세요' })
   @Column({ type: 'text' })
   comment: string;
 

@@ -9,7 +9,7 @@ import { CreateCardMemberDto } from './dto/create-card-member.dto';
 import { SearchCardParamsDto } from './dto/search-card.dto';
 import { SearchCardMemeberParamsDto } from './dto/search-card-member.dto';
 import { HttpStatus } from '@nestjs/common';
-import { SearchUserParamsDto } from 'src/user/dtos/search-user.dto';
+
 @ApiTags('8. 카드')
 @Controller('cards')
 export class CardController {

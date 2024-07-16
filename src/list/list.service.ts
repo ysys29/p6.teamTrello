@@ -84,6 +84,7 @@ export class ListService {
       id: list.id,
       title: list.title,
       cards: list.cards.map((card) => ({
+        cardId: card.id,
         title: card.title,
         deadline: card.deadline,
       })),
