@@ -11,7 +11,7 @@ const mockUserService = {
   softDelete: jest.fn(),
 };
 
-describe('UserController test code', () => {
+describe('UserController test', () => {
   let userController;
   let userService;
 
