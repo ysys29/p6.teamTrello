@@ -13,7 +13,7 @@ import {
 
 @Entity('comments')
 export class Comment {
-  @PrimaryGeneratedColumn({ unsigned: true })
+  @PrimaryGeneratedColumn()
   id: number;
   /**
    * 카드 아이디
@@ -21,7 +21,7 @@ export class Comment {
    */
   @IsNumber()
   @IsNotEmpty({ message: '댓글 작성할 카드Id를 입력해주세요.' })
-  @Column({ unsigned: true })
+  @Column()
   cardId: number;
 
   @IsNumber()
@@ -43,10 +43,8 @@ export class Comment {
   updateAt: Date;
 
   @ManyToOne(() => Card, (card) => card.comments, { onDelete: 'CASCADE' })
-  @JoinColumn({ name: 'cardId' })
   card: Card;
 
   @ManyToOne(() => User, (user) => user.comments)
-  @JoinColumn({ name: 'userId' })
   user: User;
 }

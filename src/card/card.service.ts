@@ -71,7 +71,7 @@ export class CardService {
     // 카드를 가지고 있는지 여부 검사
     const card = await this.cardRepository.findOne({
       where: { id },
-      relations: ['cardMembers'],
+      relations: ['cardMembers', 'comments'],
     });
 
     if (!card) throw new NotFoundException('카드를 찾을 수 없습니다.');
