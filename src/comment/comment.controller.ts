@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, HttpStatus, UseGuards, Req } from '@nestjs/common';
+import { Controller, Post, Body, Patch, Param, Delete, HttpStatus, UseGuards, Req } from '@nestjs/common';
 import { CommentService } from './comment.service';
 import { CreateCommentDto } from './dto/create-comment.dto';
 import { UpdateCommentDto } from './dto/update-comment.dto';
@@ -29,22 +29,6 @@ export class CommentController {
     };
   }
 
-  /**
-   * 댓글조회
-   *
-   * @returns
-   */
-  @ApiBearerAuth()
-  @UseGuards(AuthGuard('jwt'))
-  @Get(':cardId')
-  async findAll(@Param('cardId') cardId: number) {
-    const data = await this.commentService.findMany(cardId);
-    return {
-      statusCode: HttpStatus.OK,
-      message: '댓글 조회에 성공했습니다.',
-      data,
-    };
-  }
   /**
    * 댓글수정
    * @param updateCommentDto

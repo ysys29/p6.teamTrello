@@ -29,11 +29,6 @@ export class CommentService {
     return newComment;
   }
 
-  async findMany(cardId: number) {
-    const data = await this.commentRepository.find({ where: { cardId: cardId }, select: ['cardId', 'comment'] });
-    return data;
-  }
-
   async update(id: number, userId: number, updateCommentDto: UpdateCommentDto) {
     //해당하는 카드 찾기 : 입력카드 번호와 카드번호가 일치한지
     const { cardId } = updateCommentDto;
