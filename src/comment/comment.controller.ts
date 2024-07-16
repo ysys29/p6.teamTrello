@@ -36,12 +36,11 @@ export class CommentController {
    */
   @ApiBearerAuth()
   @UseGuards(AuthGuard('jwt'))
-  //할일1: 바디로 카드 아이디 받는다.
   @Get(':cardId')
   async findAll(@Param('cardId') cardId: number) {
     const data = await this.commentService.findMany(cardId);
     return {
-      statusCode: 200,
+      statusCode: HttpStatus.OK,
       message: '댓글 조회에 성공했습니다.',
       data,
     };
@@ -58,13 +57,12 @@ export class CommentController {
     const userId = req.user.id;
     const data = await this.commentService.update(id, userId, updateCommentDto);
     return {
-      statusCode: 200,
+      statusCode: HttpStatus.OK,
       message: '댓글 수정에 성공했습니다.',
       data,
     };
   }
 
-  //현재 : 내가 작성한 댓글이 아니여도 삭제가능한 상태임
   /**
    * 댓글삭제
    *@param
@@ -77,7 +75,7 @@ export class CommentController {
     const userId = req.user.id;
     const data = await this.commentService.remove(id, userId, SearchCommentDto);
     return {
-      statusCode: 200,
+      statusCode: HttpStatus.OK,
       message: '댓글 삭제에 성공했습니다.',
       data,
     };
