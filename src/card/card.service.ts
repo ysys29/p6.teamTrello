@@ -122,14 +122,14 @@ export class CardService {
   // 카드 순서 변경
   async reorderCard(cardId: number, reorderCardDto: ReorderCardDto) {
     // 유효성 검사
-    const { beforeId, afterId, ListId } = reorderCardDto;
+    const { beforeId, afterId, listId } = reorderCardDto;
     // 1. beforeId, afterId 중 최소 1개는 있어야 한다. 둘 다 없다면 false 반환
     // beforecard가 Null 이라면 첫번재 순서
     // aftercard가 Null 이라면 마지막 순서
     if (!beforeId && !afterId) throw new NotFoundException('beforeId, afterId 중 1개를 입력해주세요');
 
     // 2. 해당 리스트가 없을때 false 반환
-    const existedList = await this.listRepository.findOneBy({ id: ListId });
+    const existedList = await this.listRepository.findOneBy({ id: listId });
     console.log(existedList);
     if (!existedList) throw new NotFoundException('해당 리스트가 없습니다.');
 
@@ -141,8 +141,8 @@ export class CardService {
     // beforeId 혹은 afterId가 Null값을 줄 수 있는 경우를 제외해야한다.
     // 의도적으로 Null값을 줄 수는 있지만, 리스트 id에 맞게 찾았을때 카드가 null값이 나오면 안된다.
     if (afterId != null || beforeId != null) {
-      const existedBeforeCard = await this.cardRepository.findOneBy({ id: beforeId, listId: ListId });
-      const existedAfterCard = await this.cardRepository.findOneBy({ id: afterId, listId: ListId });
+      const existedBeforeCard = await this.cardRepository.findOneBy({ id: beforeId, listId: listId });
+      const existedAfterCard = await this.cardRepository.findOneBy({ id: afterId, listId: listId });
       if (!existedBeforeCard || !existedAfterCard) throw new NotFoundException('해당 리스트에 해당 카드가 없습니다.');
     }
 
@@ -171,7 +171,7 @@ export class CardService {
 
     // 선택한 리스트와 변경된 lexoRank값 update하기
     await this.cardRepository.update(cardId, {
-      listId: ListId,
+      listId: listId,
       lexoRank: lexoRank.toString(),
     });
     return await this.findAll();
