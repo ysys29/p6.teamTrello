@@ -5,6 +5,7 @@ import { In, Like, Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Board } from './entities/board.entity';
 import { BoardMember } from './entities/board-member.entity';
+import { List } from '../list/entities/list.entity';
 
 @Injectable()
 export class BoardService {
@@ -13,6 +14,8 @@ export class BoardService {
     private readonly boardRepository: Repository<Board>,
     @InjectRepository(BoardMember)
     private readonly boardMemberRepository: Repository<BoardMember>,
+    @InjectRepository(List) // List 리포지토리 주입
+    private readonly listRepository: Repository<List>,
   ) {}
 
   // 보드 생성
@@ -52,6 +55,12 @@ export class BoardService {
       throw new UnauthorizedException('해당 보드에 접근할 권한이 없습니다.');
     }
 
+    // 리스트를 LexoRank로 정렬
+    const lists = await this.listRepository.find({
+      where: { boardId: board.id },
+      order: { lexoRank: 'ASC' },
+    });
+
     const response = {
       id: board.id,
       title: board.title,
@@ -63,7 +72,10 @@ export class BoardService {
         id: member.id,
         userId: member.userId,
       })),
-      lists: board.lists,
+      lists: lists.map((list) => ({
+        id: list.id,
+        title: list.title,
+      })),
     };
 
     return response;
@@ -108,20 +120,55 @@ export class BoardService {
   }
 
   // 보드 멤버 조회
-  async getBoardMembers(boardId: number, userId: number): Promise<BoardMember[]> {
+  async getBoardMembers(boardId: number, userId: number) {
     // 사용자가 보드 멤버인지 확인
+    const board = await this.boardRepository.find({
+      where: { id: boardId, deletedAt: null },
+    });
+
+    if (!board) {
+      throw new NotFoundException('삭제된 보드 입니다 ');
+    }
     const isMember = await this.boardMemberRepository.findOne({
-      where: { boardId, userId },
+      relations: { board: true },
+      where: {
+        boardId,
+        userId,
+        board: {
+          deletedAt: null, //삭제가 된거는 안가져올래요
+        },
+      },
     });
 
     if (!isMember) {
       throw new UnauthorizedException('해당 보드에 접근할 권한이 없습니다.');
     }
 
-    return this.boardMemberRepository.find({
-      where: { boardId },
-      relations: ['user'],
+    const members = await this.boardMemberRepository.find({
+      relations: { board: true },
+      where: {
+        boardId: boardId,
+        board: {
+          deletedAt: null,
+          id: boardId,
+        },
+      },
     });
+
+    if (members.length === 0) {
+      throw new NotFoundException('삭제된 보드입니다');
+    }
+
+    // 필요한 데이터만 추출
+    const data = members.map((member) => ({
+      id: member.id,
+      boardId: member.boardId,
+      userId: member.userId,
+      createdAt: member.createdAt,
+      updatedAt: member.updatedAt,
+    }));
+
+    return data; // 정제된 데이터를 반환
   }
 
   // 사용자가 속한 보드 조회
@@ -130,7 +177,13 @@ export class BoardService {
       where: { userId },
       relations: ['board'],
     });
-    return boardMembers.map((member) => member.board);
+
+    // board가 null이 아니고 deletedAt이 null인 경우만 필터링
+    const boards = boardMembers
+      .map((member) => member.board)
+      .filter((board) => board !== null && board.deletedAt === null);
+
+    return boards;
   }
 
   // 제목별로 보드 검색

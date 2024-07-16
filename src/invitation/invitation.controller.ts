@@ -1,11 +1,12 @@
-import { Body, Controller, Get, Param, Patch, Post, Request, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, HttpStatus, Param, Patch, Post, Request, UseGuards } from '@nestjs/common';
 import { InvitationService } from './invitation.service';
 import { AuthGuard } from '@nestjs/passport';
 import { SendInvitationDto } from './dtos/send-invitation.dto';
 import { UpdateInvitationStatusDto } from './dtos/update-invitation-status.dto';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import { InvitationIdDto } from './dtos/invitation-id.dto';
 
-@ApiTags('보드 멤버 초대')
+@ApiTags('6. 보드 멤버 초대')
 @Controller('invitations')
 export class InvitationController {
   constructor(private readonly invitationService: InvitationService) {}
@@ -19,8 +20,14 @@ export class InvitationController {
   @ApiBearerAuth()
   @UseGuards(AuthGuard('jwt'))
   @Post()
-  async sendInvitation(@Request() user, @Body() sendInvitationDto: SendInvitationDto) {
-    return await this.invitationService.sendInvitation(user.id, sendInvitationDto);
+  async sendInvitation(@Request() req, @Body() sendInvitationDto: SendInvitationDto) {
+    const data = await this.invitationService.sendInvitation(req.user.id, sendInvitationDto);
+
+    return {
+      statusCode: HttpStatus.CREATED,
+      message: '초대를 성공적으로 전송했습니다.',
+      data,
+    };
   }
 
   /**
@@ -32,8 +39,14 @@ export class InvitationController {
   @ApiBearerAuth()
   @UseGuards(AuthGuard('jwt'))
   @Get()
-  async getReceivedInvitations(@Request() user) {
-    return this.invitationService.getReceivedInvitations(user.id);
+  async getReceivedInvitations(@Request() req) {
+    const data = await this.invitationService.getReceivedInvitations(req.user.id);
+
+    return {
+      statusCode: HttpStatus.OK,
+      message: '내가 받은 초대 목록',
+      data,
+    };
   }
 
   /**
@@ -47,10 +60,20 @@ export class InvitationController {
   @UseGuards(AuthGuard('jwt'))
   @Patch(':invitationId')
   async changeInvitationStatus(
-    @Request() user,
-    @Param('invitationId') invitationId: number,
+    @Request() req,
+    @Param() invitationIdDto: InvitationIdDto,
     @Body() updateStatusDto: UpdateInvitationStatusDto,
   ) {
-    return this.invitationService.changeInvitationStatus(user.id, invitationId, updateStatusDto);
+    const data = await this.invitationService.changeInvitationStatus(
+      req.user.id,
+      invitationIdDto.invitationId,
+      updateStatusDto,
+    );
+
+    return {
+      statusCode: HttpStatus.OK,
+      message: `${invitationIdDto.invitationId}번 초대의 상태를 변경했습니다`,
+      data,
+    };
   }
 }
