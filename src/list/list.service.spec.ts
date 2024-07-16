@@ -1,6 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { ListService } from './list.service';
-import { Repository } from 'typeorm';
+import { DataSource, Repository } from 'typeorm';
 import { List } from './entities/list.entity';
 import { Board } from 'src/board/entities/board.entity';
 import { BoardMember } from 'src/board/entities/board-member.entity';
@@ -15,7 +15,24 @@ const mockRepository = () => ({
   save: jest.fn(),
   softDelete: jest.fn(),
   findOne: jest.fn(),
+  create: jest.fn(),
 });
+
+const mockQueryRunner = {
+  connect: jest.fn(),
+  startTransaction: jest.fn(),
+  commitTransaction: jest.fn(),
+  rollbackTransaction: jest.fn(),
+  release: jest.fn(),
+  manager: {
+    findOne: jest.fn(),
+    save: jest.fn(),
+  },
+};
+
+const mockDataSource = {
+  createQueryRunner: jest.fn().mockReturnValue(mockQueryRunner),
+};
 
 // 리스트 서비스 테스트 코드
 describe('ListService test code', () => {
@@ -23,6 +40,7 @@ describe('ListService test code', () => {
   let mockListRepository: MockRepository<List>;
   let mockBoardRepository: MockRepository<Board>;
   let mockBoardMemberRepository: MockRepository<BoardMember>;
+  let mockDataSourceProvider: DataSource;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -31,6 +49,7 @@ describe('ListService test code', () => {
         { provide: getRepositoryToken(List), useFactory: mockRepository },
         { provide: getRepositoryToken(Board), useFactory: mockRepository },
         { provide: getRepositoryToken(BoardMember), useFactory: mockRepository },
+        { provide: DataSource, useValue: mockDataSource },
       ],
     }).compile();
 
@@ -38,6 +57,10 @@ describe('ListService test code', () => {
     mockListRepository = module.get(getRepositoryToken(List));
     mockBoardRepository = module.get(getRepositoryToken(Board));
     mockBoardMemberRepository = module.get(getRepositoryToken(BoardMember));
+    mockDataSourceProvider = module.get<DataSource>(DataSource);
+
+    // 모든 mock 함수 초기화
+    jest.clearAllMocks();
   });
 
   // 리스트 생성 메서드 테스트
@@ -170,14 +193,15 @@ describe('ListService test code', () => {
         id: mockList.id,
         title: mockList.title,
         cards: mockList.cards.map((card) => ({
+          cardId: card.id,
           title: card.title,
           deadline: card.deadline,
         })),
       });
       expect(list.cards).toEqual([
-        { title: 'Dummy Card 3', deadline: '2024-07-25T23:38:14.927Z' },
-        { title: 'Dummy Card 1', deadline: '2024-07-25T23:38:14.927Z' },
-        { title: 'Dummy Card 2', deadline: '2024-07-25T23:38:14.927Z' },
+        { cardId: 3, title: 'Dummy Card 3', deadline: '2024-07-25T23:38:14.927Z' },
+        { cardId: 1, title: 'Dummy Card 1', deadline: '2024-07-25T23:38:14.927Z' },
+        { cardId: 2, title: 'Dummy Card 2', deadline: '2024-07-25T23:38:14.927Z' },
       ]);
       expect(mockListRepository.findOne).toHaveBeenCalledWith({
         where: { id: mockListId },
@@ -226,24 +250,29 @@ describe('ListService test code', () => {
       const mockAfterList = dummyLists[0];
       const mockList = { ...dummyLists[2], board: { id: 1 } };
       const mockNewLexoRank = LexoRank.parse(mockAfterList.lexoRank).genPrev();
+      const mockUpdatedList = { ...mockList, lexoRank: mockNewLexoRank.toString() };
 
       mockListRepository.findOne.mockResolvedValue(mockList);
       mockBoardMemberRepository.findOne.mockResolvedValue(true);
-      mockListRepository.findOneBy.mockResolvedValue(mockAfterList);
-      mockListRepository.save.mockResolvedValue({ ...mockList, lexoRank: mockNewLexoRank.toString() });
+      mockListRepository.create.mockReturnValue(mockUpdatedList);
+      mockQueryRunner.manager.findOne.mockResolvedValue(mockAfterList);
+      mockQueryRunner.manager.save.mockResolvedValue(mockUpdatedList);
 
       // WHEN
       const result = await listService.reorderList(mockUserId, mockListId, { afterId: mockAfterId });
 
       // THEN
       expect(result).toEqual(true);
-      expect(mockListRepository.findOneBy).toHaveBeenCalledWith({ id: mockAfterId });
-      expect(mockListRepository.findOneBy).toHaveBeenCalledTimes(1);
-      expect(mockListRepository.save).toHaveBeenCalledTimes(1);
-      expect(mockListRepository.save).toHaveBeenCalledWith({
-        ...mockList,
-        lexoRank: mockNewLexoRank.toString(),
+      expect(mockQueryRunner.manager.findOne).toHaveBeenCalledWith(List, {
+        where: { id: mockAfterId },
+        lock: { mode: 'pessimistic_write' },
       });
+      expect(mockQueryRunner.manager.findOne).toHaveBeenCalledTimes(1);
+      expect(mockQueryRunner.manager.save).toHaveBeenCalledTimes(1);
+      expect(mockQueryRunner.manager.save).toHaveBeenCalledWith(List, mockUpdatedList);
+      expect(mockQueryRunner.startTransaction).toHaveBeenCalledTimes(1);
+      expect(mockQueryRunner.commitTransaction).toHaveBeenCalledTimes(1);
+      expect(mockQueryRunner.release).toHaveBeenCalledTimes(1);
     });
 
     test('리스트 사이로 이동 성공', async () => {
@@ -260,11 +289,13 @@ describe('ListService test code', () => {
       const mockBeforeListLexoRank = LexoRank.parse(mockBeforeList.lexoRank);
       const mockAfterListLexoRank = LexoRank.parse(mockAfterList.lexoRank);
       const mockNewLexoRank = mockBeforeListLexoRank.between(mockAfterListLexoRank);
+      const mockUpdatedList = { ...mockList, lexoRank: mockNewLexoRank.toString() };
 
       mockListRepository.findOne.mockResolvedValue(mockList);
       mockBoardMemberRepository.findOne.mockResolvedValue(true);
-      mockListRepository.findOneBy.mockResolvedValueOnce(mockBeforeList).mockResolvedValueOnce(mockAfterList);
-      mockListRepository.save.mockResolvedValue({ ...mockList, lexoRank: mockNewLexoRank.toString() });
+      mockQueryRunner.manager.findOne.mockResolvedValueOnce(mockBeforeList).mockResolvedValueOnce(mockAfterList);
+      mockListRepository.create.mockReturnValue(mockUpdatedList);
+      mockQueryRunner.manager.save.mockResolvedValue(mockUpdatedList);
 
       // WHEN
       const result = await listService.reorderList(mockUserId, mockListId, {
@@ -274,14 +305,20 @@ describe('ListService test code', () => {
 
       // THEN
       expect(result).toEqual(true);
-      expect(mockListRepository.findOneBy).toHaveBeenCalledWith({ id: mockBeforeId });
-      expect(mockListRepository.findOneBy).toHaveBeenCalledWith({ id: mockAfterId });
-      expect(mockListRepository.findOneBy).toHaveBeenCalledTimes(2);
-      expect(mockListRepository.save).toHaveBeenCalledTimes(1);
-      expect(mockListRepository.save).toHaveBeenCalledWith({
-        ...mockList,
-        lexoRank: mockNewLexoRank.toString(),
+      expect(mockQueryRunner.manager.findOne).toHaveBeenCalledWith(List, {
+        where: { id: mockBeforeId },
+        lock: { mode: 'pessimistic_write' },
       });
+      expect(mockQueryRunner.manager.findOne).toHaveBeenCalledWith(List, {
+        where: { id: mockAfterId },
+        lock: { mode: 'pessimistic_write' },
+      });
+      expect(mockQueryRunner.manager.findOne).toHaveBeenCalledTimes(2);
+      expect(mockQueryRunner.manager.save).toHaveBeenCalledTimes(1);
+      expect(mockQueryRunner.manager.save).toHaveBeenCalledWith(List, mockUpdatedList);
+      expect(mockQueryRunner.startTransaction).toHaveBeenCalledTimes(1);
+      expect(mockQueryRunner.commitTransaction).toHaveBeenCalledTimes(1);
+      expect(mockQueryRunner.release).toHaveBeenCalledTimes(1);
     });
 
     test('마지막으로 리스트 이동 성공', async () => {
@@ -292,24 +329,29 @@ describe('ListService test code', () => {
       const mockBeforeList = dummyLists[4];
       const mockList = { ...dummyLists[0], board: { id: 1 } };
       const mockNewLexoRank = LexoRank.parse(mockBeforeList.lexoRank).genNext();
+      const mockUpdatedList = { ...mockList, lexoRank: mockNewLexoRank.toString() };
 
       mockListRepository.findOne.mockResolvedValue(mockList);
       mockBoardMemberRepository.findOne.mockResolvedValue(true);
-      mockListRepository.findOneBy.mockResolvedValue(mockBeforeList);
-      mockListRepository.save.mockResolvedValue({ ...mockList, lexoRank: mockNewLexoRank.toString() });
+      mockQueryRunner.manager.findOne.mockResolvedValue(mockBeforeList);
+      mockListRepository.create.mockReturnValue(mockUpdatedList);
+      mockQueryRunner.manager.save.mockResolvedValue(mockUpdatedList);
 
       // WHEN
       const result = await listService.reorderList(mockUserId, mockListId, { beforeId: mockBeforeId });
 
       // THEN
       expect(result).toEqual(true);
-      expect(mockListRepository.findOneBy).toHaveBeenCalledWith({ id: mockBeforeId });
-      expect(mockListRepository.findOneBy).toHaveBeenCalledTimes(1);
-      expect(mockListRepository.save).toHaveBeenCalledTimes(1);
-      expect(mockListRepository.save).toHaveBeenCalledWith({
-        ...mockList,
-        lexoRank: mockNewLexoRank.toString(),
+      expect(mockQueryRunner.manager.findOne).toHaveBeenCalledWith(List, {
+        where: { id: mockBeforeId },
+        lock: { mode: 'pessimistic_write' },
       });
+      expect(mockQueryRunner.manager.findOne).toHaveBeenCalledTimes(1);
+      expect(mockQueryRunner.manager.save).toHaveBeenCalledTimes(1);
+      expect(mockQueryRunner.manager.save).toHaveBeenCalledWith(List, mockUpdatedList);
+      expect(mockQueryRunner.startTransaction).toHaveBeenCalledTimes(1);
+      expect(mockQueryRunner.commitTransaction).toHaveBeenCalledTimes(1);
+      expect(mockQueryRunner.release).toHaveBeenCalledTimes(1);
     });
 
     test('beforeId와 afterId 둘 다 입력 안했을 떄 에러', async () => {
@@ -343,7 +385,7 @@ describe('ListService test code', () => {
 
       mockListRepository.findOne.mockResolvedValue(mockList);
       mockBoardMemberRepository.findOne.mockResolvedValue(true);
-      mockListRepository.findOneBy.mockResolvedValue(null);
+      mockQueryRunner.manager.findOne.mockResolvedValue(null);
 
       // WHEN
       const result = listService.reorderList(mockUserId, mockListId, { beforeId: mockBeforeId });
@@ -355,7 +397,10 @@ describe('ListService test code', () => {
           message: '리스트가 변경되었으니 다시 호출해 주세요.',
         }),
       );
-      expect(mockListRepository.save).toHaveBeenCalledTimes(0);
+      expect(mockQueryRunner.manager.save).toHaveBeenCalledTimes(0);
+      expect(mockQueryRunner.startTransaction).toHaveBeenCalledTimes(1);
+      expect(mockQueryRunner.rollbackTransaction).toHaveBeenCalledTimes(1);
+      expect(mockQueryRunner.release).toHaveBeenCalledTimes(1);
     });
   });
 
