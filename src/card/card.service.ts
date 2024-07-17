@@ -176,7 +176,7 @@ export class CardService {
       if (updateResult.affected === 0) {
         throw new Error('카드 업데이트에 실패했습니다.');
       }
-      //
+
       // console.log('updateResult', updateResult);
       await queryRunner.commitTransaction(); // 트랜잭션 커밋
 
