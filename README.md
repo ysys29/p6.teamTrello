@@ -149,6 +149,9 @@
   - https://github.com/ysys29/p6.teamTrello/blob/cf4b883f2a7bdfaa41e134ff6e97f6415c9d5c28/src/comment/comment.service.ts#L53-L70
 - **7. 초대**
   - 초대 기록 조회
+  - https://github.com/ysys29/p6.teamTrello/blob/730a0ec1410a3fa100667853274cf7a7dcb6cfb7/src/invitation/invitation.service.ts#L79-L97
   - 초대 상태 변경
+  - https://github.com/ysys29/p6.teamTrello/blob/730a0ec1410a3fa100667853274cf7a7dcb6cfb7/src/invitation/invitation.service.ts#L99-L148
   - 보드 초대
+  - https://github.com/ysys29/p6.teamTrello/blob/730a0ec1410a3fa100667853274cf7a7dcb6cfb7/src/invitation/invitation.service.ts#L33-L77
 ## 6. 어려웠던 점 및 소감
