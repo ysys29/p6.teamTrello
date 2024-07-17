@@ -35,7 +35,6 @@
 --- 
 ##  개발 환경
 - 운영체제 : Window/Mac
-- FrontEnd : X
 - BackEnd : TypeScript, NestJs, MySQL(TypeORM)
 - Tool : Visual Studio Code, Insomnia, DBeaver, Swagger
 - Publish :
@@ -335,6 +334,7 @@ tsconfig.json
 ### 이강산
 ### 이연서
 ### 이성운
-- nest 어렵다. (추후 수정 )
+- nest 어렵다. (추후 수정!!!)
 ### 유승엽
 ### 나지윤
+- 팀원들과 함께 긍정적으로 협업할 수 있는 환경이 되어 즐겁게 팀프로젝트에 참여하였다. 최근 개인 nest js 과제 때에는 js 조에 있어서 이번이 처음으로 접하는 nest js 프로젝트 였는데 낯설고 새로웠지만, 팀원들을 통해 새로운 기술을 경험해볼 수 있었음.
