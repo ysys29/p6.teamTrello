@@ -41,7 +41,8 @@
 ---
 ## API 명세서 및 ERD 와이어 프레임
 - API 명세서 : https://www.notion.so/teamsparta/c16935989d154f318c0b56091822d84f
-![Uploading image.png…]()
+![image](https://github.com/user-attachments/assets/e5ebabd4-19b2-40d4-9216-96a8dc7443c4)
+
 
 - ERD : https://www.erdcloud.com/d/NQKHhEdS9LDiMjH2X
 ![image](https://github.com/user-attachments/assets/2d82a2de-05c7-4347-a784-27b0816d8a5f)
