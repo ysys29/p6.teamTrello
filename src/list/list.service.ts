@@ -29,7 +29,7 @@ export class ListService {
     private readonly boardRepository: Repository<Board>,
     @InjectRepository(BoardMember)
     private readonly boardMemberRepository: Repository<BoardMember>,
-    @InjectDataSource() private dataSource: DataSource,
+    private readonly dataSource: DataSource,
   ) {}
 
   // 리스트 생성 async createList
@@ -95,6 +95,7 @@ export class ListService {
       id: list.id,
       title: list.title,
       cards: list.cards.map((card) => ({
+        cardId: card.id,
         title: card.title,
         deadline: card.deadline,
       })),
@@ -116,25 +117,38 @@ export class ListService {
   }
 
   // 리스트 순서 변경
-  async reorderListQueryRunner(userId: number, listId: number, reorderListDto: ReorderListDto) {
-    // return this.dataSource.transaction(async (manager) => {
+  async reorderList(userId: number, listId: number, reorderListDto: ReorderListDto) {
+    const { beforeId, afterId } = reorderListDto;
+
+    if (!beforeId && !afterId) {
+      throw new BadRequestException('beforeId와 afterId 둘 중 하나는 입력해 주세요.');
+    }
+
+    // 리스트 접근 권한 체크
+    const list = await this.validateListAccess({ userId, listId });
+
     const queryRunner = this.dataSource.createQueryRunner();
     await queryRunner.connect();
     await queryRunner.startTransaction();
+
     try {
-      //매니저 : 엔티티메니저 , await 뒤 this자리에 들어가는 듯
-      const { beforeId, afterId } = reorderListDto;
-
-      if (!beforeId && !afterId) {
-        throw new BadRequestException('beforeId와 afterId 둘 중 하나는 입력해 주세요.');
-      }
-
-      // 리스트 접근 권한 체크
-      const list = await this.validateListAccess({ userId, listId });
-
       // 이동 후 이전과 이후에 위치할 리스트 찾기
-      const beforeList = beforeId ? await queryRunner.manager.findOneBy(List, { id: beforeId }) : null; // ex) 6번 리스트를 2번과 3번 사이로 이동시킨다면 2번 리스트
-      const afterList = afterId ? await queryRunner.manager.findOneBy(List, { id: afterId }) : null; // ex) 6번 리스트를 2번과 3번 사이로 이동시킨다면 3번 리스트
+
+      // ex) 6번 리스트를 2번과 3번 사이로 이동시킨다면 2번 리스트
+      const beforeList = beforeId
+        ? await queryRunner.manager.findOne(List, {
+            where: { id: beforeId },
+            lock: { mode: 'pessimistic_write' },
+          })
+        : null;
+
+      // ex) 6번 리스트를 2번과 3번 사이로 이동시킨다면 3번 리스트
+      const afterList = afterId
+        ? await queryRunner.manager.findOne(List, {
+            where: { id: afterId },
+            lock: { mode: 'pessimistic_write' },
+          })
+        : null;
 
       // beforeId가 있고, beforeList가 없는 경우
       if ((beforeId && !beforeList) || (afterId && !afterList)) {
@@ -158,29 +172,21 @@ export class ListService {
         // 리스트와 리스트 사이로 이동시켰을 때
         lexoRank = beforeListLexoRank.between(afterListLexoRank);
       }
-      list.lexoRank = lexoRank.toString();
-      await queryRunner.manager.save(list);
+
+      const updatedList = this.listRepository.create({ ...list, lexoRank: lexoRank.toString() });
+
+      await queryRunner.manager.save(List, updatedList);
+
       await queryRunner.commitTransaction();
+
       return true;
-      // return await manager.save(list);;
     } catch (error) {
       await queryRunner.rollbackTransaction();
-      if (error instanceof BadRequestException) {
-        throw error;
-      }
-      throw new InternalServerErrorException('리스트 순서 변경 중 오류가 발생했습니다.');
+      throw error;
     } finally {
-      //   validateListAccess(arg0: { userId: number; listId: number; }) {
-      //   throw new Error('Method not implemented.');
-      // }
       await queryRunner.release();
     }
-    // throw new InternalServerErrorException()
 
-    // const updatedList = await manager.save(List, { ...list, lexoRank: lexoRank.toString() });
-
-    // return await manager.save(updatedList);
-    // });
   }
 
   // 리스트 삭제

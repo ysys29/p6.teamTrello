@@ -7,7 +7,7 @@ import { AuthGuard } from '@nestjs/passport';
 import { SearchCommentDto } from './dto/search-comment.dto';
 
 @ApiTags('댓글')
-@Controller('comment')
+@Controller('comments')
 export class CommentController {
   constructor(private readonly commentService: CommentService) {}
 

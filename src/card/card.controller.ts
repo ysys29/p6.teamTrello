@@ -9,8 +9,9 @@ import { CreateCardMemberDto } from './dto/create-card-member.dto';
 import { SearchCardParamsDto } from './dto/search-card.dto';
 import { SearchCardMemeberParamsDto } from './dto/search-card-member.dto';
 import { HttpStatus } from '@nestjs/common';
+
 @ApiTags('8. 카드')
-@Controller('card')
+@Controller('cards')
 export class CardController {
   constructor(private readonly cardService: CardService) {}
   /**
@@ -26,22 +27,6 @@ export class CardController {
     return {
       statusCode: HttpStatus.CREATED,
       message: '카드 생성에 성공했습니다.',
-      data,
-    };
-  }
-  /**
-   * 카드 목록 조회
-   * @returns
-   */
-
-  @ApiBearerAuth()
-  @UseGuards(AuthGuard('jwt'))
-  @Get()
-  async findAll() {
-    const data = await this.cardService.findAll();
-    return {
-      statusCode: HttpStatus.OK,
-      message: '카드 목록 조회에 성공했습니다.',
       data,
     };
   }
@@ -130,24 +115,6 @@ export class CardController {
     return {
       statusCode: HttpStatus.OK,
       message: '카드 작업자 할당에 성공했습니다.',
-      data,
-    };
-  }
-
-  /**
-   * 카드 작업자 정보 조회
-   * @param cardId
-   * @param userId
-   * @returns
-   */
-  @ApiBearerAuth()
-  @UseGuards(AuthGuard('jwt'))
-  @Get(':cardId/workers/:userId')
-  async findWorker(@Param() searchCardMemeberParam: SearchCardMemeberParamsDto) {
-    const data = await this.cardService.findWorker(searchCardMemeberParam.cardId, searchCardMemeberParam.userId);
-    return {
-      statusCode: HttpStatus.OK,
-      message: '카드 작업자 정보 조회에 성공했습니다.',
       data,
     };
   }

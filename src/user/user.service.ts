@@ -14,10 +14,10 @@ export class UserService {
     private readonly userRepository: Repository<User>,
   ) {}
 
-  async findOneById(userId: number) {
+  async findMe(userId: number) {
     const user = await this.userRepository.findOne({
       where: { id: userId },
-      relations: ['boardMembers'],
+      relations: ['boardMembers', 'cardMembers', 'comments'],
     });
     if (!user) {
       throw new NotFoundException('사용자를 찾을 수 없습니다.');
@@ -33,9 +33,25 @@ export class UserService {
         id: boardMember.id,
         boardId: boardMember.boardId,
       })),
+      cardMembers: user.cardMembers.map((cardMember) => ({
+        cardId: cardMember.cardId,
+      })),
+      comments: user.comments.map((comment) => ({
+        commentId: comment.id,
+        comment: comment.comment,
+      })),
     };
 
     return response;
+  }
+
+  async findOneById(userId: number) {
+    const user = await this.userRepository.findOne({ where: { id: userId } });
+    if (!user) {
+      throw new NotFoundException('사용자를 찾을 수 없습니다.');
+    }
+
+    return user;
   }
 
   async update(id: number, updateUserDto: UpdateUserDto) {

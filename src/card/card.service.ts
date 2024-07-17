@@ -58,22 +58,13 @@ export class CardService {
     });
     return data;
   }
-  // 카드 목록 조회
-  async findAll() {
-    const cards = await this.cardRepository.find({
-      select: ['id', 'listId', 'title', 'content', 'color', 'deadline', 'lexoRank'],
-      order: {
-        lexoRank: 'DESC',
-      },
-    });
-    return cards;
-  }
+
   // 카드 상세 조회
   async findOne(id: number) {
     // 카드를 가지고 있는지 여부 검사
     const card = await this.cardRepository.findOne({
       where: { id },
-      relations: ['cardMembers'],
+      relations: ['cardMembers', 'comments'],
     });
 
     if (!card) throw new NotFoundException('카드를 찾을 수 없습니다.');
@@ -83,23 +74,18 @@ export class CardService {
 
   // 카드 수정
   async update(id: number, updateCardDto: UpdateCardDto) {
-    const { listId, title, content, color, deadline } = updateCardDto;
+    const { title, content, color, deadline } = updateCardDto;
     // 카드를 가지고 있는지 여부 검사
     const existedCard = this.findOne(id);
     if (!existedCard) throw new NotFoundException('카드를 찾을 수 없습니다.');
 
-    // 해당 리스트가 있는지 여부 검사
-    const existedList = await this.listRepository.findOneBy({ id: listId });
-    if (!existedList) throw new NotFoundException('리스트를 찾을 수 없습니다.');
-
     // 수정할 데이터 업데이트
-    // 리스트id, 제목, 내용, 색 중 1가지라도 있으면 수정이 된다.
+    // 제목, 내용, 색 중 1가지라도 있으면 수정이 된다.
 
     // 업데이트할 데이터의 조건
     const updateCondition = { id: id };
     // 업데이트할 데이터의 값
     const updateData: any = {
-      ...(listId !== null ? { listId } : {}),
       ...(title !== null ? { title } : {}),
       ...(content !== null ? { content } : {}),
       ...(color !== null ? { color } : {}),
@@ -235,26 +221,13 @@ export class CardService {
     return cardWorker;
   }
 
-  // 작업자 조회
-  async findWorker(cardId: number, workerId: number) {
-    // 카드에 맞는 해당 작업자가 없다면 false반환
-    const existedWorker = await this.cardMemberRepository.findOneBy({
-      cardId: cardId,
-      userId: workerId,
-    });
-    if (!existedWorker) throw new NotFoundException('해당 카드에 맞는 작업자가 없습니다.');
-    const worker = await this.userRepository.findOneBy({
-      id: workerId,
-    });
-    if (!worker) throw new NotFoundException('사용자 정보를 찾을 수 없습니다.');
-
-    return worker;
-  }
-
   // 작업자 제거
   async deleteWorker(cardId: number, workerId: number) {
     //카드에 맞는 작업자가 있는지
-    const findWorker = await this.findWorker(cardId, workerId);
+    const findWorker = await this.cardMemberRepository.findOneBy({
+      cardId: cardId,
+      userId: workerId,
+    });
     if (!findWorker) throw new NotFoundException('해당 카드에 맞는 작업자가 없습니다.');
 
     const worker = await this.cardMemberRepository.delete({
