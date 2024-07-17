@@ -87,8 +87,9 @@
 ## 5. 주요 기능 및 설명
 - **1. 인증**
   - 5-1-1 인증이메일 발송
-  - 
+  - https://github.com/ysys29/p6.teamTrello/blob/7990392a796cb7cf8c5b44ae9cf44493e8eef0f0/src/email/email.service.ts#L28-L84
   - 5-1-2 회원가입
+  - https://github.com/ysys29/p6.teamTrello/blob/7990392a796cb7cf8c5b44ae9cf44493e8eef0f0/src/auth/auth.service.ts#L25-L78
   - 5-1-3 로그인
   - https://github.com/ysys29/p6.teamTrello/blob/cf4b883f2a7bdfaa41e134ff6e97f6415c9d5c28/src/auth/auth.service.ts#L80-L102
 - **2. 유저**
@@ -141,17 +142,17 @@
   - 5-5-7 카드 작업자 제거
   - https://github.com/ysys29/p6.teamTrello/blob/cf4b883f2a7bdfaa41e134ff6e97f6415c9d5c28/src/card/card.service.ts#L199-L213
 - **6. 댓글**
-  - 댓글 생성
+  - 5-6-1 댓글 생성
   - https://github.com/ysys29/p6.teamTrello/blob/cf4b883f2a7bdfaa41e134ff6e97f6415c9d5c28/src/comment/comment.service.ts#L15-L30
-  - 댓글 수정
+  - 5-6-2 댓글 수정
   - https://github.com/ysys29/p6.teamTrello/blob/cf4b883f2a7bdfaa41e134ff6e97f6415c9d5c28/src/comment/comment.service.ts#L32-L52
-  - 댓글 삭제
+  - 5-6-3 댓글 삭제
   - https://github.com/ysys29/p6.teamTrello/blob/cf4b883f2a7bdfaa41e134ff6e97f6415c9d5c28/src/comment/comment.service.ts#L53-L70
 - **7. 초대**
-  - 초대 기록 조회
+  - 5-7-1 초대 기록 조회
   - https://github.com/ysys29/p6.teamTrello/blob/730a0ec1410a3fa100667853274cf7a7dcb6cfb7/src/invitation/invitation.service.ts#L79-L97
-  - 초대 상태 변경
+  - 5-7-2 초대 상태 변경
   - https://github.com/ysys29/p6.teamTrello/blob/730a0ec1410a3fa100667853274cf7a7dcb6cfb7/src/invitation/invitation.service.ts#L99-L148
-  - 보드 초대
+  - 5-7-3 보드 초대
   - https://github.com/ysys29/p6.teamTrello/blob/730a0ec1410a3fa100667853274cf7a7dcb6cfb7/src/invitation/invitation.service.ts#L33-L77
 ## 6. 어려웠던 점 및 소감
