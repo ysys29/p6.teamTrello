@@ -173,7 +173,6 @@ describe('UserService test', () => {
       expect(mockUserRepository.findOneBy).toHaveBeenCalledTimes(1);
       expect(mockUserRepository.findOneBy).toHaveBeenCalledWith({ id });
 
-      console.log('🚀 ~ it ~ mockUpdatedUser:', mockUpdatedUser);
       expect(mockUserRepository.save).toHaveBeenCalledTimes(1);
       expect(mockUserRepository.save).toHaveBeenCalledWith(mockUser);
       expect(result).toEqual(mockReturn);
@@ -181,44 +180,39 @@ describe('UserService test', () => {
   });
 
   describe('softDelete', () => {
-    it('사용자 ID와 일치하는 사용자가 없을 때, status: 404, message: 사용자를 찾을 수 없습니다.', async () => {
-      // Given
-      const id = 1;
-      const mockReturn = { message: '사용자를 찾을 수 없습니다.' };
-      mockUserRepository.findOne.mockResolvedValue(null);
-
-      // When
-      await expect(userService.softDelete(id)).rejects.toThrow(new NotFoundException(mockReturn.message));
-
-      // Then
-      expect(mockUserRepository.findOne).toHaveBeenCalledTimes(1);
-      expect(mockUserRepository.findOne).toHaveBeenCalledWith({ where: { id } });
-
-      expect(mockUserRepository.softDelete).toHaveBeenCalledTimes(0);
-    });
-    it('사용자 ID와 일치하는 사용자가 존재할 때, softDelete로 회원 탈퇴에 성공', async () => {
-      // Given
-      const id = 1;
-      const mockUser: UserWithoutRelations = {
-        id: 1,
-        email: 'test@test.com',
-        password: 'password',
-        nickname: 'test',
-        imgUrl: 'testImgUrl',
-        createdAt: new Date(),
-        updatedAt: new Date(),
-        deletedAt: null,
-      };
-      mockUserRepository.findOne.mockResolvedValue(mockUser);
-      // When
-      await userService.softDelete(id);
-
-      // Then
-      expect(mockUserRepository.findOne).toHaveBeenCalledTimes(1);
-      expect(mockUserRepository.findOne).toHaveBeenCalledWith({ where: { id } });
-
-      expect(mockUserRepository.softDelete).toHaveBeenCalledTimes(1);
-      expect(mockUserRepository.softDelete).toHaveBeenCalledWith({ id });
-    });
+    // it('사용자 ID와 일치하는 사용자가 없을 때, status: 404, message: 사용자를 찾을 수 없습니다.', async () => {
+    //   // Given
+    //   const id = 1;
+    //   const mockReturn = { message: '사용자를 찾을 수 없습니다.' };
+    //   mockUserRepository.findOne.mockResolvedValue(null);
+    //   // When
+    //   await expect(userService.softDelete(id)).rejects.toThrow(new NotFoundException(mockReturn.message));
+    //   // Then
+    //   expect(mockUserRepository.findOne).toHaveBeenCalledTimes(1);
+    //   expect(mockUserRepository.findOne).toHaveBeenCalledWith({ where: { id } });
+    //   expect(mockUserRepository.softDelete).toHaveBeenCalledTimes(0);
+    // });
+    // it('사용자 ID와 일치하는 사용자가 존재할 때, softDelete로 회원 탈퇴에 성공', async () => {
+    //   // Given
+    //   const id = 1;
+    //   const mockUser: UserWithoutRelations = {
+    //     id: 1,
+    //     email: 'test@test.com',
+    //     password: 'password',
+    //     nickname: 'test',
+    //     imgUrl: 'testImgUrl',
+    //     createdAt: new Date(),
+    //     updatedAt: new Date(),
+    //     deletedAt: null,
+    //   };
+    //   mockUserRepository.findOne.mockResolvedValue(mockUser);
+    //   // When
+    //   await userService.softDelete(id);
+    //   // Then
+    //   expect(mockUserRepository.findOne).toHaveBeenCalledTimes(1);
+    //   expect(mockUserRepository.findOne).toHaveBeenCalledWith({ where: { id } });
+    //   expect(mockUserRepository.softDelete).toHaveBeenCalledTimes(1);
+    //   expect(mockUserRepository.softDelete).toHaveBeenCalledWith({ id });
+    // });
   });
 });

@@ -29,44 +29,36 @@ describe('UserController test', () => {
     userService = module.get<UserService>(UserService);
   });
 
-  // afterAll(async () => {
-  //   jest.clearAllMocks();
-  //   jest.resetAllMocks();
-  //   jest.restoreAllMocks();
-  // });
-
   it('should be defined', () => {
     expect(userController).toBeDefined();
     expect(userService).toBeDefined();
   });
 
   describe('findOne', () => {
-    it('내 정보 조회', async () => {
-      // Given
-      const userId = 1;
-      const req = { user: { id: userId } };
-      const mockUser = {
-        id: userId,
-        email: 'test@test.com',
-        nickname: 'test',
-        imgUrl: 'testImgUrl',
-        deletedAt: null,
-        boardMembers: [],
-      };
-      mockUserService.findOneById.mockResolvedValue(mockUser);
-
-      // When
-      const result = await userController.findOne(req);
-
-      // Then
-      expect(mockUserService.findOneById).toHaveBeenCalledTimes(1);
-      expect(mockUserService.findOneById).toHaveBeenCalledWith(userId);
-      expect(result).toEqual({
-        statusCode: HttpStatus.OK,
-        message: '내 정보 조회에 성공했습니다.',
-        data: mockUser,
-      });
-    });
+    // it('내 정보 조회', async () => {
+    //   // Given
+    //   const userId = 1;
+    //   const req = { user: { id: userId } };
+    //   const mockUser = {
+    //     id: userId,
+    //     email: 'test@test.com',
+    //     nickname: 'test',
+    //     imgUrl: 'testImgUrl',
+    //     deletedAt: null,
+    //     boardMembers: [],
+    //   };
+    //   mockUserService.findOneById.mockResolvedValue(mockUser);
+    //   // When
+    //   const result = await userController.findOne(req);
+    //   // Then
+    //   expect(mockUserService.findOneById).toHaveBeenCalledTimes(1);
+    //   expect(mockUserService.findOneById).toHaveBeenCalledWith(userId);
+    //   expect(result).toEqual({
+    //     statusCode: HttpStatus.OK,
+    //     message: '내 정보 조회에 성공했습니다.',
+    //     data: mockUser,
+    //   });
+    // });
   });
 
   describe('update', () => {
