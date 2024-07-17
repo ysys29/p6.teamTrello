@@ -1,4 +1,4 @@
-# 🖥️ Team 재밌어요 NodeJs 트렐로 프로젝트 (팀 협업 개발도구 만들기) 
+![와이어프레임 PNG](https://github.com/user-attachments/assets/266b43be-aca6-44d4-b13a-2c12b75f71ce)# 🖥️ Team 재밌어요 NodeJs 트렐로 프로젝트 (팀 협업 개발도구 만들기) 
 
 ![thumbnail](https://github.com/user-attachments/assets/974904ff-6aa1-4c4e-bcfa-350b3bdb383b)
 
@@ -41,10 +41,13 @@
 ---
 ## API 명세서 및 ERD 와이어 프레임
 - API 명세서 : https://www.notion.so/teamsparta/c16935989d154f318c0b56091822d84f
+![Uploading image.png…]()
 
 - ERD : https://www.erdcloud.com/d/NQKHhEdS9LDiMjH2X
+![image](https://github.com/user-attachments/assets/2d82a2de-05c7-4347-a784-27b0816d8a5f)
 
-- 와이어프레임 : 
+- 와이어프레임 : https://www.figma.com/design/yA6fAdwz0YFXkOF9kVU5sz/p6-wire-frame?node-id=0-1&t=FfWyT0zdcOd3u5X5-0
+![와이어프레임 PNG](https://github.com/user-attachments/assets/afc65fcc-3df3-4467-95f8-eff0519977b4)
 
 ##  역할 분담
 - **이강산**
