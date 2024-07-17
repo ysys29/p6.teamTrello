@@ -54,6 +54,11 @@
 ### 폴더 구조
 
 ```markdown
+📦.github
+📦.vscode
+📦coverage
+📦dist
+📦node_modules
 📦src
  ┣ 📂auth
  ┃ ┣ 📂dtos
@@ -64,7 +69,6 @@
  ┃ ┣ 📂strategies
  ┃ ┃ ┣ 📜jwt.strategy.ts
  ┃ ┃ ┗ 📜local.strategy.ts
- ┃ ┣ 📜auth.controller.spec.ts
  ┃ ┣ 📜auth.controller.ts
  ┃ ┣ 📜auth.module.ts
  ┃ ┣ 📜auth.service.spec.ts
@@ -76,7 +80,6 @@
  ┃ ┣ 📂entities
  ┃ ┃ ┣ 📜board-member.entity.ts
  ┃ ┃ ┗ 📜board.entity.ts
- ┃ ┣ 📜board.controller.spec.ts
  ┃ ┣ 📜board.controller.ts
  ┃ ┣ 📜board.module.ts
  ┃ ┣ 📜board.service.spec.ts
@@ -94,7 +97,6 @@
  ┃ ┣ 📂entities
  ┃ ┃ ┣ 📜card-member.entity.ts
  ┃ ┃ ┗ 📜card.entity.ts
- ┃ ┣ 📜card.controller.spec.ts
  ┃ ┣ 📜card.controller.ts
  ┃ ┣ 📜card.module.ts
  ┃ ┣ 📜card.service.spec.ts
@@ -106,10 +108,8 @@
  ┃ ┃ ┗ 📜update-comment.dto.ts
  ┃ ┣ 📂entities
  ┃ ┃ ┗ 📜comment.entity.ts
- ┃ ┣ 📜comment.controller.spec.ts
  ┃ ┣ 📜comment.controller.ts
  ┃ ┣ 📜comment.module.ts
- ┃ ┣ 📜comment.service.spec.ts
  ┃ ┗ 📜comment.service.ts
  ┣ 📂configs
  ┃ ┣ 📜database.config.ts
@@ -121,10 +121,8 @@
  ┃ ┃ ┗ 📜send-email.dto.ts
  ┃ ┣ 📂entities
  ┃ ┃ ┗ 📜email.entity.ts
- ┃ ┣ 📜email.controller.spec.ts
  ┃ ┣ 📜email.controller.ts
  ┃ ┣ 📜email.module.ts
- ┃ ┣ 📜email.service.spec.ts
  ┃ ┗ 📜email.service.ts
  ┣ 📂invitation
  ┃ ┣ 📂dtos
@@ -135,10 +133,8 @@
  ┃ ┃ ┗ 📜invitation.entity.ts
  ┃ ┣ 📂types
  ┃ ┃ ┗ 📜invitation-status.type.ts
- ┃ ┣ 📜invitation.controller.spec.ts
  ┃ ┣ 📜invitation.controller.ts
  ┃ ┣ 📜invitation.module.ts
- ┃ ┣ 📜invitation.service.spec.ts
  ┃ ┗ 📜invitation.service.ts
  ┣ 📂list
  ┃ ┣ 📂dtos
@@ -152,7 +148,6 @@
  ┃ ┃ ┗ 📜list.entity.ts
  ┃ ┣ 📂types
  ┃ ┃ ┗ 📜validate-list-access.type.ts
- ┃ ┣ 📜list.controller.spec.ts
  ┃ ┣ 📜list.controller.ts
  ┃ ┣ 📜list.module.ts
  ┃ ┣ 📜list.service.spec.ts
@@ -171,9 +166,20 @@
  ┣ 📜app.controller.ts
  ┣ 📜app.module.ts
  ┗ 📜main.ts
- 📦test
- ┣ 📜app.e2e-spec.ts
- ┗ 📜jest-e2e.json
+ ┣ 📂test
+ ┃ ┣ 📜app.e2e-spec.ts
+ ┃ ┗ 📜jest-e2e.json
+.env
+.gitignore
+.eslintre.js
+.prettierrc
+.gitignore
+.nest-cli,json
+package-lock.json
+package.json
+README.md
+tsconfig.build.json
+tsconfig.json
 ```
 ---
 
