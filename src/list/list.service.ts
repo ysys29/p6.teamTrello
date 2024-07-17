@@ -1,11 +1,5 @@
-import {
-  BadRequestException,
-  Injectable,
-  InternalServerErrorException,
-  NotFoundException,
-  UnauthorizedException,
-} from '@nestjs/common';
-import { InjectDataSource, InjectRepository } from '@nestjs/typeorm';
+import { BadRequestException, Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
 import { List } from './entities/list.entity';
 import { DataSource, Repository } from 'typeorm';
 import { LexoRank } from 'lexorank';
@@ -18,10 +12,6 @@ import { UpdateListDto } from './dtos/update-list.dto';
 
 @Injectable()
 export class ListService {
-  createList(id: any, createListDto: CreateListDto) {
-    throw new Error('Method not implemented.');
-  }
-  // dataSource: any;
   constructor(
     @InjectRepository(List)
     private readonly listRepository: Repository<List>,
@@ -32,8 +22,8 @@ export class ListService {
     private readonly dataSource: DataSource,
   ) {}
 
-  // 리스트 생성 async createList
-  private async createListQueryRunner(userId: number, createListDto: CreateListDto) {
+  // 리스트 생성
+  async createList(userId: number, createListDto: CreateListDto) {
     const { boardId, title } = createListDto;
 
     // 해당 아이디의 보드가 있는지 확인
@@ -186,7 +176,6 @@ export class ListService {
     } finally {
       await queryRunner.release();
     }
-
   }
 
   // 리스트 삭제
