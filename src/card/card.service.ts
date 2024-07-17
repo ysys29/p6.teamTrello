@@ -175,9 +175,9 @@ export class CardService {
 
       // 이동할 위치에 따른 LexoRank값 할당
       // 1. 맨 처음-> 첫번째 위치한 카드의 LexoRank값에서 genPrev()를 이용해 더 작은 LexoRank값을 할당
-      if (!beforeCard) lexoRank = afterCardLexoRank.genNext();
+      if (!beforeCard) lexoRank = afterCardLexoRank.genPrev();
       // 2. 맨 끝  -> 마지막에 위치한 카드의 LexoRank값에서 genNext()를 이용해 더 큰 LexoRank값을 할당
-      else if (!afterCard) lexoRank = beforeCardLexoRank.genPrev();
+      else if (!afterCard) lexoRank = beforeCardLexoRank.genNext();
       // 3. 두 카드 사이 ->  between()을 이용해서 두 카드의 LexoRank값들의 사이값인 LexoRank값을 할당
       else lexoRank = beforeCardLexoRank.between(afterCardLexoRank);
 
