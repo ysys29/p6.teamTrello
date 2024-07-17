@@ -136,36 +136,51 @@
 - **4. 리스트**
   - 5-4-1 리스트 생성
   - https://github.com/ysys29/p6.teamTrello/blob/cf4b883f2a7bdfaa41e134ff6e97f6415c9d5c28/src/list/list.service.ts#L25-L74
+   ![리스트생성](https://github.com/user-attachments/assets/6bc75df3-61b4-4c66-9836-fcbe07cad3d7)
   - 5-4-2 리스트 상세 조회
   - https://github.com/ysys29/p6.teamTrello/blob/cf4b883f2a7bdfaa41e134ff6e97f6415c9d5c28/src/list/list.service.ts#L76-L93
+    ![리스트상세조회](https://github.com/user-attachments/assets/53e8df28-f24e-4113-ac9c-53fad6016d86)
   - 5-4-3 리스트 이름 수정
   - https://github.com/ysys29/p6.teamTrello/blob/cf4b883f2a7bdfaa41e134ff6e97f6415c9d5c28/src/list/list.service.ts#L95-L107
+   ![리스트이름수정](https://github.com/user-attachments/assets/51a86544-3a7d-4b88-a96f-8371c350065d)
   - 5-4-4 리스트 순서 이동
   - https://github.com/ysys29/p6.teamTrello/blob/cf4b883f2a7bdfaa41e134ff6e97f6415c9d5c28/src/list/list.service.ts#L109-L179
+    ![리스트순서이동](https://github.com/user-attachments/assets/ca1351c1-8ed0-4e00-afc8-9b8c19cc78aa)
   - 5-4-5 리스트 삭제
   - https://github.com/ysys29/p6.teamTrello/blob/cf4b883f2a7bdfaa41e134ff6e97f6415c9d5c28/src/list/list.service.ts#L181-L218
+    ![리스트삭제](https://github.com/user-attachments/assets/57226c35-731f-4504-9f02-2dcf2e3140f7)
 - **5. 카드**
   - 5-5-1 카드 생성
   - https://github.com/ysys29/p6.teamTrello/blob/cf4b883f2a7bdfaa41e134ff6e97f6415c9d5c28/src/card/card.service.ts#L23-L58
+    ![카드생성](https://github.com/user-attachments/assets/8c1c753b-6878-4723-8dc8-b8c23fba989e)
   - 5-5-2 카드 조회
   - https://github.com/ysys29/p6.teamTrello/blob/cf4b883f2a7bdfaa41e134ff6e97f6415c9d5c28/src/card/card.service.ts#L60-L71
+    ![카드상세조회](https://github.com/user-attachments/assets/10da11cb-5261-466b-a041-5f97d66552d3)
   - 5-5-3 카드 수정
   - https://github.com/ysys29/p6.teamTrello/blob/cf4b883f2a7bdfaa41e134ff6e97f6415c9d5c28/src/card/card.service.ts#L73-L95
+    ![카드수정](https://github.com/user-attachments/assets/a93978de-6434-43ae-aa0f-a08f0bd5c0a0)
   - 5-5-4 카드 순서 변경
   - https://github.com/ysys29/p6.teamTrello/blob/cf4b883f2a7bdfaa41e134ff6e97f6415c9d5c28/src/card/card.service.ts#L108-L174
+    ![카순변](https://github.com/user-attachments/assets/912ded06-c1a2-4af7-957a-3bed77531323)
   - 5-5-5 카드 삭제
   - https://github.com/ysys29/p6.teamTrello/blob/cf4b883f2a7bdfaa41e134ff6e97f6415c9d5c28/src/card/card.service.ts#L97-L106
+    ![카드삭제](https://github.com/user-attachments/assets/7f000534-f519-4e6b-b0a9-53d8b5c83f88)
   - 5-5-6 카드 작업자 할당
   - https://github.com/ysys29/p6.teamTrello/blob/cf4b883f2a7bdfaa41e134ff6e97f6415c9d5c28/src/card/card.service.ts#L176-L197
+    ![카드작업자할당](https://github.com/user-attachments/assets/8c5aa5aa-eb7d-4c33-a1ac-7a502e9d308c)
   - 5-5-7 카드 작업자 제거
   - https://github.com/ysys29/p6.teamTrello/blob/cf4b883f2a7bdfaa41e134ff6e97f6415c9d5c28/src/card/card.service.ts#L199-L213
+    ![카드작업자삭제](https://github.com/user-attachments/assets/f330d0d8-2a26-4b4c-a604-2d43447467be)
 - **6. 댓글**
   - 5-6-1 댓글 생성
   - https://github.com/ysys29/p6.teamTrello/blob/cf4b883f2a7bdfaa41e134ff6e97f6415c9d5c28/src/comment/comment.service.ts#L15-L30
+    ![댓글생성](https://github.com/user-attachments/assets/11d73cc8-e33b-486a-95e1-574ea683995f)
   - 5-6-2 댓글 수정
   - https://github.com/ysys29/p6.teamTrello/blob/cf4b883f2a7bdfaa41e134ff6e97f6415c9d5c28/src/comment/comment.service.ts#L32-L52
+    ![댓글수정](https://github.com/user-attachments/assets/2e58efbb-6e41-45b9-b3e8-ea8063bd960f)
   - 5-6-3 댓글 삭제
   - https://github.com/ysys29/p6.teamTrello/blob/cf4b883f2a7bdfaa41e134ff6e97f6415c9d5c28/src/comment/comment.service.ts#L53-L70
+    ![댓글삭제](https://github.com/user-attachments/assets/800d61c5-2b5a-4199-8653-07c2f0e73913)
 - **7. 초대**
   - 5-7-1 초대 기록 조회
   - https://github.com/ysys29/p6.teamTrello/blob/730a0ec1410a3fa100667853274cf7a7dcb6cfb7/src/invitation/invitation.service.ts#L79-L97
