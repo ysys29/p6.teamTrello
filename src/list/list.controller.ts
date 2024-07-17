@@ -81,7 +81,7 @@ export class ListController {
   @UseGuards(AuthGuard('jwt'))
   @Patch(':listId/reorder')
   async reorderList(@Request() req, @Param() listIdDto: ListIdDto, @Body() reorderListDto: ReorderListDto) {
-    const data = await this.listService.reorderListQueryRunner(req.user.id, listIdDto.listId, reorderListDto);
+    const data = await this.listService.reorderList(req.user.id, listIdDto.listId, reorderListDto);
 
     return {
       statusCode: HttpStatus.OK,
