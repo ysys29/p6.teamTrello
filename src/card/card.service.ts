@@ -3,7 +3,7 @@ import { CreateCardDto } from './dto/create-card.dto';
 import { UpdateCardDto } from './dto/update-card.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Card } from './entities/card.entity';
-import { Repository } from 'typeorm';
+import { DataSource, Repository } from 'typeorm';
 import { ReorderCardDto } from './dto/reorder-card.dto';
 import { LexoRank } from 'lexorank';
 import { List } from 'src/list/entities/list.entity';
@@ -14,47 +14,59 @@ import { CreateCardMemberDto } from './dto/create-card-member.dto';
 @Injectable()
 export class CardService {
   constructor(
-    @InjectRepository(Card) private readonly cardRepository: Repository<Card>,
-    @InjectRepository(List) private readonly listRepository: Repository<List>,
-    @InjectRepository(User) private readonly userRepository: Repository<User>,
-    @InjectRepository(CardMember) private readonly cardMemberRepository: Repository<CardMember>,
+    @InjectRepository(Card)
+    private readonly cardRepository: Repository<Card>,
+    @InjectRepository(List)
+    private readonly listRepository: Repository<List>,
+    @InjectRepository(User)
+    private readonly userRepository: Repository<User>,
+    @InjectRepository(CardMember)
+    private readonly cardMemberRepository: Repository<CardMember>,
+    private readonly dataSource: DataSource,
   ) {}
 
   async create(createCardDto: CreateCardDto) {
     const { listId, title, content, color } = createCardDto;
-    // 카드 이름이 중복되었을때
-    const existedCard = await this.cardRepository.findOneBy({
-      title: title,
-    });
-    if (existedCard) throw new ConflictException('이미 사용중인 카드 이름입니다.');
 
-    // LexoRank값 생성
-    let lexoRank: LexoRank;
-    // 해당 리스트의 (가장 lexoRank값이 가장 큰) = 첫번째 카드 찾기 =>
-    const lastCard = await this.cardRepository.findOne({
-      where: { listId },
-      order: { lexoRank: 'DESC' },
-    });
-    // 리스트에 카드가 하나도 없다면 첫 카드는 Lexo값 중간값 지정
-    // LexoRank값의 중간값 == 초기 LexoRank값을 생성할때 쓰임
-    if (!lastCard) {
-      lexoRank = LexoRank.middle();
-    } else {
-      // 리스트에 카드가 있다면, 첫번째에 위치한 카드의 lexoRank보다 큰 값 생성
-      const lastListLexoRank = LexoRank.parse(lastCard.lexoRank);
+    const queryRunner = this.dataSource.createQueryRunner();
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
 
-      lexoRank = lastListLexoRank.genNext();
+    try {
+      // 마지막 카드를 찾기
+      const lastCard = await queryRunner.manager
+        .createQueryBuilder(Card, 'card')
+        .where('card.listId = :listId', { listId })
+        .andWhere('card.nextCardId IS NULL')
+        .setLock('pessimistic_write')
+        .getOne();
+
+      console.log('🚀 ~ CardService ~ create ~ lastCard:', lastCard);
+
+      // 새로운 카드 생성
+      const newCard = await queryRunner.manager.save(Card, {
+        listId,
+        title,
+        content,
+        color,
+        nextCardId: null,
+      });
+
+      // 마지막 카드가 존재한다면, 그 카드의 nextCardId를 새로운 카드의 ID로 설정
+      if (lastCard) {
+        lastCard.nextCardId = newCard.id;
+        await queryRunner.manager.save(Card, lastCard);
+      }
+
+      await queryRunner.commitTransaction();
+
+      return newCard;
+    } catch (error) {
+      await queryRunner.rollbackTransaction();
+      throw error;
+    } finally {
+      await queryRunner.release();
     }
-
-    const data = await this.cardRepository.save({
-      listId,
-      title,
-      content,
-      color,
-      // lexorank형식으로 되있으므로 entity에 명시된대로 string으로 바꿔주기
-      lexoRank: lexoRank.toString(),
-    });
-    return data;
   }
 
   // 카드 상세 조회
@@ -99,78 +111,137 @@ export class CardService {
     // 카드를 가지고 있는지 여부 검사
     const card = await this.findOne(id);
     if (!card) throw new NotFoundException('카드를 찾을 수 없습니다.');
-    await this.cardRepository.delete({
-      id: id,
+
+    // nextCardId로 삭제할 카드 앞의 카드를 검색함.
+    const previousCard = await this.cardRepository.findOne({
+      where: { nextCardId: id },
     });
+
+    // 존재하면 삭제할 카드의 nextCardId를 previousCard의 nextCardId로 저장해서 연결
+    if (previousCard) {
+      previousCard.nextCardId = card.nextCardId;
+      await this.cardRepository.save(previousCard);
+    }
+
+    await this.cardRepository.delete(id);
     return card;
   }
 
   // 카드 순서 변경
   async reorderCard(cardId: number, reorderCardDto: ReorderCardDto) {
-    // 유효성 검사
     const { beforeId, afterId, listId } = reorderCardDto;
-    // 1. beforeId, afterId 중 최소 1개는 있어야 한다. 둘 다 없다면 false 반환
-    // beforeCard가 Null 이라면 첫번재 순서
-    // afterCard가 Null 이라면 마지막 순서
+
     if (!beforeId && !afterId) throw new NotFoundException('beforeId, afterId 중 1개를 입력해주세요');
 
-    // 2. 해당 리스트가 없을때 false 반환
-    const existedList = await this.listRepository.findOneBy({ id: listId });
-    console.log(existedList);
-    if (!existedList) throw new NotFoundException('해당 리스트가 없습니다.');
+    /**
+     * beforeId && afterId : 중간으로 이동
+     * 1. moving카드의 기존 연결 해제
+     * movingCard의 nextCardId로 갖고 있던 이전 카드를 previousCard라 하면,
+     * previousCard가 존재: previousCard의 nextCardId를 movingCardId의 nextCardId로 저장. null일 수도 있음.
+     * previousCard가 존재하지 않음(movingCard가 맨 앞카드였을 때) : 그냥 다음 단계.
+     *
+     * 2. moving카드의 앞 뒤 연결
+     * movingCard의 nextCardId에 beforeCard의 nextCardId를 저장 : 뒤에 연결.
+     * beforeCard의 nextCardId를 movingCard의 id로 저장 : 앞에 연결.
+     * */
 
-    // Id값으로 이동 했을때 전과 후의 카드 찾기
-    const beforeCard = beforeId ? await this.cardRepository.findOneBy({ id: beforeId }) : null; // ex) 6번 리스트를 2번과 3번 사이로 이동시킨다면 2번 리스트
-    const afterCard = afterId ? await this.cardRepository.findOneBy({ id: afterId }) : null; // ex) 6번 리스트를 2번과 3번 사이로 이동시킨다면 3번 리스트
+    /**
+     * !beforeId && afterId : 맨 뒤로 이동.
+     * 1. moving카드의 기존 연결 해제
+     * movingCard의 nextCardId로 갖고 있던 이전 카드를 previousCard라 하면,
+     * previousCard가 존재: previousCard의 nextCardId를 movingCardId의 nextCardId로 저장. null일 수도 있음.
+     * previousCard가 존재하지 않음(movingCard가 맨 앞카드였을 때) : 그냥 다음 단계.
+     *
+     * 2. moving카드의 앞 뒤 연결
+     * movingCard의 nextCardId에 beforeCard의 nextCardId를 저장 : 뒤에 연결.
+     * beforeCard의 nextCardId를 movingCard의 id로 저장 : 앞에 연결.
+     * */
 
-    // 3, 해당 리스트 안에, 해당 카드가 없다면 false 반환
-    // beforeId 혹은 afterId가 Null값을 줄 수 있는 경우를 제외해야한다.
-    // 의도적으로 Null값을 줄 수는 있지만, 리스트 id에 맞게 찾았을때 카드가 null값이 나오면 안된다.
-    if (afterId != null || beforeId != null) {
-      const existedBeforeCard = await this.cardRepository.findOneBy({ id: beforeId, listId: listId });
-      const existedAfterCard = await this.cardRepository.findOneBy({ id: afterId, listId: listId });
-      if (!existedBeforeCard || !existedAfterCard) throw new NotFoundException('해당 리스트에 해당 카드가 없습니다.');
+    /**
+     * beforeId && !afterId : 맨 앞으로 이동.
+     * 1. moving카드의 기존 연결 해제
+     * movingCard의 nextCardId로 갖고 있던 이전 카드를 previousCard라 하면,
+     * previousCard가 존재: previousCard의 nextCardId를 movingCardId의 nextCardId로 저장. null일 수도 있음.
+     * previousCard가 존재하지 않음(movingCard가 맨 앞카드였을 때) : 그냥 다음 단계.
+     *
+     * 2. moving카드의 앞 뒤 연결
+     * movingCard의 nextCardId에 beforeCard의 nextCardId를 저장 : 뒤에 연결.
+     * beforeCard의 nextCardId를 movingCard의 id로 저장 : 앞에 연결.
+     * */
+
+    const queryRunner = this.dataSource.createQueryRunner();
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
+
+    try {
+      const existedList = await queryRunner.manager.findOne(List, {
+        where: { id: listId },
+        lock: { mode: 'pessimistic_write' },
+      });
+      if (!existedList) throw new NotFoundException('해당 리스트가 없습니다.');
+
+      const movingCard = await queryRunner.manager.findOne(Card, {
+        where: { id: cardId },
+        lock: { mode: 'pessimistic_write' },
+      });
+      if (!movingCard) throw new NotFoundException('카드를 찾을 수 없습니다.');
+
+      let previousCard = null;
+      if (beforeId) {
+        const beforeCard = await queryRunner.manager.findOne(Card, {
+          where: { id: beforeId },
+          lock: { mode: 'pessimistic_write' },
+        });
+        if (!beforeCard) throw new NotFoundException('beforeId에 해당하는 카드를 찾을 수 없습니다.');
+
+        movingCard.nextCardId = beforeCard.nextCardId;
+        beforeCard.nextCardId = movingCard.id;
+        await queryRunner.manager.save(Card, beforeCard);
+      }
+
+      if (afterId) {
+        const afterCard = await queryRunner.manager.findOne(Card, {
+          where: { id: afterId },
+          lock: { mode: 'pessimistic_write' },
+        });
+        if (!afterCard) throw new NotFoundException('afterId에 해당하는 카드를 찾을 수 없습니다.');
+
+        previousCard = await queryRunner.manager.findOne(Card, {
+          where: { nextCardId: afterCard.id },
+          lock: { mode: 'pessimistic_write' },
+        });
+
+        if (previousCard) {
+          previousCard.nextCardId = movingCard.id;
+          await queryRunner.manager.save(Card, previousCard);
+        }
+
+        movingCard.nextCardId = afterCard.id;
+      }
+
+      // If the card was moved from being the last card, update the previous last card's nextCardId to null
+      if (movingCard.nextCardId === null) {
+        const previousLastCard = await queryRunner.manager.findOne(Card, {
+          where: { listId, nextCardId: cardId },
+          lock: { mode: 'pessimistic_write' },
+        });
+
+        if (previousLastCard) {
+          previousLastCard.nextCardId = null;
+          await queryRunner.manager.save(Card, previousLastCard);
+        }
+      }
+
+      await queryRunner.manager.save(Card, movingCard);
+      await queryRunner.commitTransaction();
+
+      return await queryRunner.manager.findOne(Card, { where: { id: cardId } });
+    } catch (error) {
+      await queryRunner.rollbackTransaction();
+      throw error;
+    } finally {
+      await queryRunner.release();
     }
-
-    // 만약 두 카드의 리스트 아이디가 다르다면 false 반환
-    // 근데 위의 조건은 3번에 의해 에러가 날것이다. 3번 조건에 의해 처리될것이니 필요없다고 생각.
-    //if (beforeCard.listId !== afterCard.listId) throw new NotFoundException('두 카드의 리스트 아이디가 다릅니다.');
-
-    // 이전과 이후 카드의 lexoRank 값
-    const beforeCardLexoRank = beforeCard ? LexoRank.parse(beforeCard.lexoRank) : null;
-    const afterCardLexoRank = afterCard ? LexoRank.parse(afterCard.lexoRank) : null;
-    // 4. lexoRank값은 전 > 후. 하지만 전 < 후가 된다면?
-    // 근데 웹사이트에서는 카드를 옮기면 알아서 전과 후가 정해지는 것 같다. 왜지?
-    // 유효성 검사 끝
-
-    // 카드 변경 로직
-    // 이동할 아이템에 새로 할당할 lexoRank 정의
-    let lexoRank: LexoRank;
-
-    // 이동할 위치에 따른 LexoRank값 할당
-    // 1. 맨 처음-> 첫번째 위치한 카드의 LexoRank값에서 genPrev()를 이용해 더 작은 LexoRank값을 할당
-    if (!beforeCard) lexoRank = afterCardLexoRank.genNext();
-    // 2. 맨 끝  -> 마지막에 위치한 카드의 LexoRank값에서 genNext()를 이용해 더 큰 LexoRank값을 할당
-    else if (!afterCard) lexoRank = beforeCardLexoRank.genPrev();
-    // 3. 두 카드 사이 ->  between()을 이용해서 두 카드의 LexoRank값들의 사이값인 LexoRank값을 할당
-    else lexoRank = beforeCardLexoRank.between(afterCardLexoRank);
-
-    // 선택한 리스트와 변경된 lexoRank값 update하기
-    await this.cardRepository.update(cardId, {
-      listId: listId,
-      lexoRank: lexoRank.toString(),
-    });
-    const list = await this.listRepository.findOne({
-      where: { id: listId },
-      relations: ['cards'],
-      order: {
-        cards: {
-          lexoRank: 'ASC',
-        },
-      },
-    });
-
-    return list;
   }
 
   // 작업자 할당

@@ -9,6 +9,7 @@ import { ReorderListDto } from './dtos/reorder-list.dto';
 import { ValidateListAccess } from './types/validate-list-access.type';
 import { CreateListDto } from './dtos/create-list.dto';
 import { UpdateListDto } from './dtos/update-list.dto';
+import { Card } from 'src/card/entities/card.entity';
 
 @Injectable()
 export class ListService {
@@ -78,18 +79,33 @@ export class ListService {
     // 리스트 접근 권한 체크
     const list = await this.validateListAccess({ userId, listId, relation: true });
 
-    //카드를 lexoRank를 기준으로 정렬(asc로)
-    list.cards.sort((a, b) => a.lexoRank.localeCompare(b.lexoRank)); //localCompare: 문자열과 문자열을 비교
+    const sortedCards = this.sortCardsByNextCardId(list.cards);
 
     return {
       id: list.id,
       title: list.title,
-      cards: list.cards.map((card) => ({
+      cards: sortedCards.map((card) => ({
         cardId: card.id,
         title: card.title,
         deadline: card.deadline,
       })),
     };
+  }
+
+  // 카드 목록을 Linked List 구조로 정렬
+  private sortCardsByNextCardId(cards: Card[]): Card[] {
+    const cardMap = new Map<number, Card>();
+    cards.forEach((card) => cardMap.set(card.id, card));
+
+    const sortedCards: Card[] = [];
+    let currentCard = cards.find((card) => !cards.some((c) => c.nextCardId === card.id));
+
+    while (currentCard) {
+      sortedCards.push(currentCard);
+      currentCard = currentCard.nextCardId ? cardMap.get(currentCard.nextCardId) : null;
+    }
+
+    return sortedCards;
   }
 
   // 리스트 이름 수정
