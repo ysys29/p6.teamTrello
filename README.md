@@ -21,7 +21,7 @@
 - 구분 : 팀 프로젝트
 - GitHub : https://github.com/ysys29/p6.teamTrello
 - 시연 영상 : 
-- 배포 : 
+- 배포 : https://www.jaemisseoyo.site/api
 --- 
 ## 팀원 구성
 - 팀장 : 이강산 [@KangSanLee24](https://github.com/KangSanLee24)
