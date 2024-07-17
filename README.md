@@ -46,7 +46,7 @@
 
 - 와이어프레임 : 
 
-##  역할 분배
+##  역할 분담
 - **이강산**
   - 인증이메일 발송
   - 회원가입
@@ -83,8 +83,8 @@
   - 보드 수정
   - 보드 삭제
   - 보드 멤버 조회  
-## 4. API 명세서 및 ERD, 와이어 프레임
-## 5. 주요 기능 및 설명
+
+## 주요 기능 및 설명
 - **1. 인증**
   - 5-1-1 인증이메일 발송
   - https://github.com/ysys29/p6.teamTrello/blob/7990392a796cb7cf8c5b44ae9cf44493e8eef0f0/src/email/email.service.ts#L28-L84
@@ -155,4 +155,5 @@
   - https://github.com/ysys29/p6.teamTrello/blob/730a0ec1410a3fa100667853274cf7a7dcb6cfb7/src/invitation/invitation.service.ts#L99-L148
   - 5-7-3 보드 초대
   - https://github.com/ysys29/p6.teamTrello/blob/730a0ec1410a3fa100667853274cf7a7dcb6cfb7/src/invitation/invitation.service.ts#L33-L77
-## 6. 어려웠던 점 및 소감
+## 트러블 슈팅
+## 어려웠던 점 및 소감
