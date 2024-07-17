@@ -21,6 +21,8 @@ export class ListService {
     @InjectRepository(BoardMember)
     private readonly boardMemberRepository: Repository<BoardMember>,
     private readonly dataSource: DataSource,
+    @InjectRepository(Card)
+    private cardRepository: Repository<Card>,
   ) {}
 
   // 리스트 생성
@@ -76,10 +78,9 @@ export class ListService {
 
   // 리스트 상세 조회
   async getList(userId: number, listId: number) {
-    // 리스트 접근 권한 체크
     const list = await this.validateListAccess({ userId, listId, relation: true });
 
-    const sortedCards = this.sortCardsByNextCardId(list.cards);
+    const sortedCards = await this.sortCardsByParent(list.id);
 
     return {
       id: list.id,
@@ -92,20 +93,22 @@ export class ListService {
     };
   }
 
-  // 카드 목록을 Linked List 구조로 정렬
-  private sortCardsByNextCardId(cards: Card[]): Card[] {
-    const cardMap = new Map<number, Card>();
-    cards.forEach((card) => cardMap.set(card.id, card));
+  // 카드 목록을 부모 기준으로 정렬
+  private async sortCardsByParent(listId: number): Promise<Card[]> {
+    const query = `
+        WITH RECURSIVE card_hierarchy AS (
+          SELECT id, title, content, color, deadline, parent, list_id
+          FROM cards
+          WHERE parent = 0 AND list_id = ?
+          UNION ALL
+          SELECT c.id, c.title, c.content, c.color, c.deadline, c.parent, c.list_id
+          FROM cards c
+          INNER JOIN card_hierarchy ch ON ch.id = c.parent
+        )
+        SELECT * FROM card_hierarchy;
+      `;
 
-    const sortedCards: Card[] = [];
-    let currentCard = cards.find((card) => !cards.some((c) => c.nextCardId === card.id));
-
-    while (currentCard) {
-      sortedCards.push(currentCard);
-      currentCard = currentCard.nextCardId ? cardMap.get(currentCard.nextCardId) : null;
-    }
-
-    return sortedCards;
+    return this.cardRepository.query(query, [listId]);
   }
 
   // 리스트 이름 수정

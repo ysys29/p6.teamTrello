@@ -23,7 +23,7 @@ export class CardController {
   @UseGuards(AuthGuard('jwt'))
   @Post()
   async create(@Body() createCardDto: CreateCardDto) {
-    const data = await this.cardService.create(createCardDto);
+    const data = await this.cardService.createCard(createCardDto);
     return {
       statusCode: HttpStatus.CREATED,
       message: '카드 생성에 성공했습니다.',
@@ -66,22 +66,22 @@ export class CardController {
     };
   }
 
-  /**
-   * 카드 삭제
-   * @param cardId
-   * @returns
-   */
-  @ApiBearerAuth()
-  @UseGuards(AuthGuard('jwt'))
-  @Delete(':cardId')
-  async remove(@Param() searchCardParam: SearchCardParamsDto) {
-    const data = await this.cardService.remove(searchCardParam.cardId);
-    return {
-      statusCode: HttpStatus.OK,
-      message: '카드 삭제에 성공했습니다.',
-      data,
-    };
-  }
+  // /**
+  //  * 카드 삭제
+  //  * @param cardId
+  //  * @returns
+  //  */
+  // @ApiBearerAuth()
+  // @UseGuards(AuthGuard('jwt'))
+  // @Delete(':cardId')
+  // async remove(@Param() searchCardParam: SearchCardParamsDto) {
+  //   const data = await this.cardService.remove(searchCardParam.cardId);
+  //   return {
+  //     statusCode: HttpStatus.OK,
+  //     message: '카드 삭제에 성공했습니다.',
+  //     data,
+  //   };
+  // }
 
   /**
    * 카드 순서 변경

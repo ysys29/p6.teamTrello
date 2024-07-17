@@ -51,8 +51,8 @@ export class Card {
   @Column()
   color: string;
 
-  @Column({ nullable: true })
-  nextCardId: number | null;
+  @Column({ default: 0 })
+  parent: number;
 
   @Column({ nullable: true })
   deadline?: Date;

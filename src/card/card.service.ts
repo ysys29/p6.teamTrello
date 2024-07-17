@@ -25,48 +25,78 @@ export class CardService {
     private readonly dataSource: DataSource,
   ) {}
 
-  async create(createCardDto: CreateCardDto) {
+  // 카드 생성
+  async createCard(createCardDto: CreateCardDto): Promise<Card> {
     const { listId, title, content, color } = createCardDto;
 
-    const queryRunner = this.dataSource.createQueryRunner();
-    await queryRunner.connect();
-    await queryRunner.startTransaction();
+    // 마지막 카드를 찾아서 parent 설정
+    const lastCard = await this.cardRepository.findOne({
+      where: { listId },
+      order: { id: 'DESC' },
+    });
 
-    try {
-      // 마지막 카드를 찾기
-      const lastCard = await queryRunner.manager
-        .createQueryBuilder(Card, 'card')
-        .where('card.listId = :listId', { listId })
-        .andWhere('card.nextCardId IS NULL')
-        .setLock('pessimistic_write')
-        .getOne();
+    const parent = lastCard ? lastCard.id : 0;
 
-      console.log('🚀 ~ CardService ~ create ~ lastCard:', lastCard);
+    const card = this.cardRepository.create({
+      listId,
+      title,
+      content,
+      color,
+      parent,
+    });
 
-      // 새로운 카드 생성
-      const newCard = await queryRunner.manager.save(Card, {
-        listId,
-        title,
-        content,
-        color,
-        nextCardId: null,
+    return this.cardRepository.save(card);
+  }
+
+  // 카드 순서 변경
+  // 카드 순서 변경
+  async reorderCard(cardId: number, reorderCardDto: ReorderCardDto) {
+    const { beforeId, afterId, listId } = reorderCardDto;
+
+    if (!beforeId && !afterId) throw new NotFoundException('beforeId, afterId 중 1개를 입력해주세요');
+
+    const existedList = await this.cardRepository.findOne({ where: { listId } });
+    if (!existedList) throw new NotFoundException('해당 리스트가 없습니다.');
+
+    const movingCard = await this.cardRepository.findOne({ where: { id: cardId } });
+    if (!movingCard) throw new NotFoundException('카드를 찾을 수 없습니다.');
+
+    if (beforeId) {
+      const beforeCard = await this.cardRepository.findOne({ where: { id: beforeId } });
+      if (!beforeCard) throw new NotFoundException('beforeId에 해당하는 카드를 찾을 수 없습니다.');
+
+      movingCard.parent = beforeCard.id;
+
+      // B 카드의 parent를 D 카드로 변경
+      const afterCard = await this.cardRepository.findOne({
+        where: { parent: beforeCard.id },
       });
 
-      // 마지막 카드가 존재한다면, 그 카드의 nextCardId를 새로운 카드의 ID로 설정
-      if (lastCard) {
-        lastCard.nextCardId = newCard.id;
-        await queryRunner.manager.save(Card, lastCard);
+      if (afterCard) {
+        afterCard.parent = movingCard.id;
+        await this.cardRepository.save(afterCard);
+      }
+    }
+
+    if (afterId) {
+      const afterCard = await this.cardRepository.findOne({ where: { id: afterId } });
+      if (!afterCard) throw new NotFoundException('afterId에 해당하는 카드를 찾을 수 없습니다.');
+
+      const previousCard = await this.cardRepository.findOne({
+        where: { parent: afterCard.id },
+      });
+
+      if (previousCard) {
+        previousCard.parent = movingCard.id;
+        await this.cardRepository.save(previousCard);
       }
 
-      await queryRunner.commitTransaction();
-
-      return newCard;
-    } catch (error) {
-      await queryRunner.rollbackTransaction();
-      throw error;
-    } finally {
-      await queryRunner.release();
+      movingCard.parent = afterCard.id;
     }
+
+    await this.cardRepository.save(movingCard);
+
+    return movingCard;
   }
 
   // 카드 상세 조회
@@ -106,143 +136,26 @@ export class CardService {
     return data;
   }
 
-  // 카드 삭제
-  async remove(id: number) {
-    // 카드를 가지고 있는지 여부 검사
-    const card = await this.findOne(id);
-    if (!card) throw new NotFoundException('카드를 찾을 수 없습니다.');
+  // // 카드 삭제
+  // async remove(id: number) {
+  //   // 카드를 가지고 있는지 여부 검사
+  //   const card = await this.findOne(id);
+  //   if (!card) throw new NotFoundException('카드를 찾을 수 없습니다.');
 
-    // nextCardId로 삭제할 카드 앞의 카드를 검색함.
-    const previousCard = await this.cardRepository.findOne({
-      where: { nextCardId: id },
-    });
+  //   // nextCardId로 삭제할 카드 앞의 카드를 검색함.
+  //   const previousCard = await this.cardRepository.findOne({
+  //     where: { nextCardId: id },
+  //   });
 
-    // 존재하면 삭제할 카드의 nextCardId를 previousCard의 nextCardId로 저장해서 연결
-    if (previousCard) {
-      previousCard.nextCardId = card.nextCardId;
-      await this.cardRepository.save(previousCard);
-    }
+  //   // 존재하면 삭제할 카드의 nextCardId를 previousCard의 nextCardId로 저장해서 연결
+  //   if (previousCard) {
+  //     previousCard.nextCardId = card.nextCardId;
+  //     await this.cardRepository.save(previousCard);
+  //   }
 
-    await this.cardRepository.delete(id);
-    return card;
-  }
-
-  // 카드 순서 변경
-  async reorderCard(cardId: number, reorderCardDto: ReorderCardDto) {
-    const { beforeId, afterId, listId } = reorderCardDto;
-
-    if (!beforeId && !afterId) throw new NotFoundException('beforeId, afterId 중 1개를 입력해주세요');
-
-    /**
-     * beforeId && afterId : 중간으로 이동
-     * 1. moving카드의 기존 연결 해제
-     * movingCard의 nextCardId로 갖고 있던 이전 카드를 previousCard라 하면,
-     * previousCard가 존재: previousCard의 nextCardId를 movingCardId의 nextCardId로 저장. null일 수도 있음.
-     * previousCard가 존재하지 않음(movingCard가 맨 앞카드였을 때) : 그냥 다음 단계.
-     *
-     * 2. moving카드의 앞 뒤 연결
-     * movingCard의 nextCardId에 beforeCard의 nextCardId를 저장 : 뒤에 연결.
-     * beforeCard의 nextCardId를 movingCard의 id로 저장 : 앞에 연결.
-     * */
-
-    /**
-     * !beforeId && afterId : 맨 뒤로 이동.
-     * 1. moving카드의 기존 연결 해제
-     * movingCard의 nextCardId로 갖고 있던 이전 카드를 previousCard라 하면,
-     * previousCard가 존재: previousCard의 nextCardId를 movingCardId의 nextCardId로 저장. null일 수도 있음.
-     * previousCard가 존재하지 않음(movingCard가 맨 앞카드였을 때) : 그냥 다음 단계.
-     *
-     * 2. moving카드의 앞 뒤 연결
-     * movingCard의 nextCardId에 beforeCard의 nextCardId를 저장 : 뒤에 연결.
-     * beforeCard의 nextCardId를 movingCard의 id로 저장 : 앞에 연결.
-     * */
-
-    /**
-     * beforeId && !afterId : 맨 앞으로 이동.
-     * 1. moving카드의 기존 연결 해제
-     * movingCard의 nextCardId로 갖고 있던 이전 카드를 previousCard라 하면,
-     * previousCard가 존재: previousCard의 nextCardId를 movingCardId의 nextCardId로 저장. null일 수도 있음.
-     * previousCard가 존재하지 않음(movingCard가 맨 앞카드였을 때) : 그냥 다음 단계.
-     *
-     * 2. moving카드의 앞 뒤 연결
-     * movingCard의 nextCardId에 beforeCard의 nextCardId를 저장 : 뒤에 연결.
-     * beforeCard의 nextCardId를 movingCard의 id로 저장 : 앞에 연결.
-     * */
-
-    const queryRunner = this.dataSource.createQueryRunner();
-    await queryRunner.connect();
-    await queryRunner.startTransaction();
-
-    try {
-      const existedList = await queryRunner.manager.findOne(List, {
-        where: { id: listId },
-        lock: { mode: 'pessimistic_write' },
-      });
-      if (!existedList) throw new NotFoundException('해당 리스트가 없습니다.');
-
-      const movingCard = await queryRunner.manager.findOne(Card, {
-        where: { id: cardId },
-        lock: { mode: 'pessimistic_write' },
-      });
-      if (!movingCard) throw new NotFoundException('카드를 찾을 수 없습니다.');
-
-      let previousCard = null;
-      if (beforeId) {
-        const beforeCard = await queryRunner.manager.findOne(Card, {
-          where: { id: beforeId },
-          lock: { mode: 'pessimistic_write' },
-        });
-        if (!beforeCard) throw new NotFoundException('beforeId에 해당하는 카드를 찾을 수 없습니다.');
-
-        movingCard.nextCardId = beforeCard.nextCardId;
-        beforeCard.nextCardId = movingCard.id;
-        await queryRunner.manager.save(Card, beforeCard);
-      }
-
-      if (afterId) {
-        const afterCard = await queryRunner.manager.findOne(Card, {
-          where: { id: afterId },
-          lock: { mode: 'pessimistic_write' },
-        });
-        if (!afterCard) throw new NotFoundException('afterId에 해당하는 카드를 찾을 수 없습니다.');
-
-        previousCard = await queryRunner.manager.findOne(Card, {
-          where: { nextCardId: afterCard.id },
-          lock: { mode: 'pessimistic_write' },
-        });
-
-        if (previousCard) {
-          previousCard.nextCardId = movingCard.id;
-          await queryRunner.manager.save(Card, previousCard);
-        }
-
-        movingCard.nextCardId = afterCard.id;
-      }
-
-      // If the card was moved from being the last card, update the previous last card's nextCardId to null
-      if (movingCard.nextCardId === null) {
-        const previousLastCard = await queryRunner.manager.findOne(Card, {
-          where: { listId, nextCardId: cardId },
-          lock: { mode: 'pessimistic_write' },
-        });
-
-        if (previousLastCard) {
-          previousLastCard.nextCardId = null;
-          await queryRunner.manager.save(Card, previousLastCard);
-        }
-      }
-
-      await queryRunner.manager.save(Card, movingCard);
-      await queryRunner.commitTransaction();
-
-      return await queryRunner.manager.findOne(Card, { where: { id: cardId } });
-    } catch (error) {
-      await queryRunner.rollbackTransaction();
-      throw error;
-    } finally {
-      await queryRunner.release();
-    }
-  }
+  //   await this.cardRepository.delete(id);
+  //   return card;
+  // }
 
   // 작업자 할당
   async choiceWorker(cardId: number, createCardMeberDto: CreateCardMemberDto) {
@@ -250,12 +163,9 @@ export class CardService {
     // 카드아이디에 맞는 카드가 없다면
     const existedCard = await this.cardRepository.findOneBy({ id: cardId });
     if (!existedCard) throw new NotFoundException('카드 없음');
-
     // 유저아이디에 맞는 유저가 없다면
-
     const existedUser = await this.userRepository.findOneBy({ id: userId });
     if (!existedUser) throw new NotFoundException('유저 없음');
-
     // 유저가 이미 카드 작업자로 할당 되있다면 false반환
     const existedWorker = await this.cardMemberRepository.findOneBy({ userId: userId });
     if (existedWorker) throw new ConflictException('유저가 이미 등록되어있음.');
