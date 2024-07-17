@@ -108,7 +108,7 @@ export class CardController {
   @UseGuards(AuthGuard('jwt'))
   @Patch(':cardId/reorder')
   async reorderCard(@Param() searchCardParam: SearchCardParamsDto, @Body() reorderCardDto: ReorderCardDto) {
-    const data = await this.cardService.reorderCard(searchCardParam.cardId, reorderCardDto);
+    const data = await this.cardService.reorderCardQueryRunner(searchCardParam.cardId, reorderCardDto);
     return {
       statusCode: HttpStatus.OK,
       message: '카드 순서 변경에 성공했습니다.',
