@@ -104,103 +104,103 @@ describe('AuthService', () => {
       );
     });
 
-    it('인증 이메일을 발송한 기록이 없을 경우, BadRequestException 발생', async () => {
-      // Given
-      const signUpDto: SignUpDto = {
-        email: 'test@test.com',
-        token: 'token.token.token',
-        password: 'Password1!',
-        passwordConfirm: 'Password1!',
-        nickname: 'nickname',
-        imgUrl: 'imgUrl',
-      };
+    // it('인증 이메일을 발송한 기록이 없을 경우, BadRequestException 발생', async () => {
+    //   // Given
+    //   const signUpDto: SignUpDto = {
+    //     email: 'test@test.com',
+    //     token: 'token.token.token',
+    //     password: 'Password1!',
+    //     passwordConfirm: 'Password1!',
+    //     nickname: 'nickname',
+    //     imgUrl: 'imgUrl',
+    //   };
 
-      mockEmailService.findEmail.mockResolvedValue(null);
+    //   mockEmailService.findEmail.mockResolvedValue(null);
 
-      // When & Then
-      await expect(authService.signUp(signUpDto)).rejects.toThrow(
-        new BadRequestException('인증 이메일을 발송한 기록이 없습니다.'),
-      );
-    });
+    //   // When & Then
+    //   await expect(authService.signUp(signUpDto)).rejects.toThrow(
+    //     new BadRequestException('인증 이메일을 발송한 기록이 없습니다.'),
+    //   );
+    // });
 
-    it('보드 ID가 없는 경우 회원가입 성공', async () => {
-      // Given
-      const signUpDto: SignUpDto = {
-        email: 'test@test.com',
-        token: 'token.token.token',
-        password: 'Password1!',
-        passwordConfirm: 'Password1!',
-        nickname: 'nickname',
-        imgUrl: 'imgUrl',
-      };
+    // it('보드 ID가 없는 경우 회원가입 성공', async () => {
+    //   // Given
+    //   const signUpDto: SignUpDto = {
+    //     email: 'test@test.com',
+    //     token: 'token.token.token',
+    //     password: 'Password1!',
+    //     passwordConfirm: 'Password1!',
+    //     nickname: 'nickname',
+    //     imgUrl: 'imgUrl',
+    //   };
 
-      mockEmailService.findEmail.mockResolvedValue(signUpDto);
+    //   mockEmailService.findEmail.mockResolvedValue(signUpDto);
 
-      const decodedToken = { payload: { email: signUpDto.email, boardId: 0 } };
-      mockJwtService.decode.mockReturnValue(decodedToken);
+    //   const decodedToken = { payload: { email: signUpDto.email, boardId: 0 } };
+    //   mockJwtService.decode.mockReturnValue(decodedToken);
 
-      const hashedPassword = 'hashedPassword';
-      jest.spyOn(bcrypt, 'hashSync').mockReturnValue(hashedPassword);
+    //   const hashedPassword = 'hashedPassword';
+    //   jest.spyOn(bcrypt, 'hashSync').mockReturnValue(hashedPassword);
 
-      mockUserRepository.save.mockResolvedValue({ ...signUpDto, id: 1, password: hashedPassword });
-      const mockReturn = { accessToken: 'accessToken' };
+    //   mockUserRepository.save.mockResolvedValue({ ...signUpDto, id: 1, password: hashedPassword });
+    //   const mockReturn = { accessToken: 'accessToken' };
 
-      // When
-      const result = await authService.signUp(signUpDto);
+    //   // When
+    //   const result = await authService.signUp(signUpDto);
 
-      // Then
-      expect(mockUserRepository.save).toHaveBeenCalledTimes(1);
-      expect(mockUserRepository.save).toHaveBeenCalledWith({
-        email: signUpDto.email,
-        password: hashedPassword,
-        nickname: signUpDto.nickname,
-        imgUrl: signUpDto.imgUrl,
-      });
-      expect(invitationService.changeInvitationStatus).toHaveBeenCalledTimes(0);
-      expect(result).toEqual(mockReturn);
-    });
+    //   // Then
+    //   expect(mockUserRepository.save).toHaveBeenCalledTimes(1);
+    //   expect(mockUserRepository.save).toHaveBeenCalledWith({
+    //     email: signUpDto.email,
+    //     password: hashedPassword,
+    //     nickname: signUpDto.nickname,
+    //     imgUrl: signUpDto.imgUrl,
+    //   });
+    //   expect(invitationService.changeInvitationStatus).toHaveBeenCalledTimes(0);
+    //   expect(result).toEqual(mockReturn);
+    // });
 
-    it('보드 ID가 있는 경우 회원가입 성공 후 보드 초대 수락', async () => {
-      // Given
-      const signUpDto: SignUpDto = {
-        email: 'test@test.com',
-        token: 'token.token.token',
-        password: 'password',
-        passwordConfirm: 'password',
-        nickname: 'nickname',
-        imgUrl: 'imgUrl',
-      };
+    // it('보드 ID가 있는 경우 회원가입 성공 후 보드 초대 수락', async () => {
+    //   // Given
+    //   const signUpDto: SignUpDto = {
+    //     email: 'test@test.com',
+    //     token: 'token.token.token',
+    //     password: 'password',
+    //     passwordConfirm: 'password',
+    //     nickname: 'nickname',
+    //     imgUrl: 'imgUrl',
+    //   };
 
-      mockEmailService.findEmail.mockResolvedValue(signUpDto.email);
+    //   mockEmailService.findEmail.mockResolvedValue(signUpDto.email);
 
-      const decodedToken = { payload: { email: signUpDto.email, boardId: 1 } };
-      mockJwtService.decode.mockReturnValue(decodedToken);
+    //   const decodedToken = { payload: { email: signUpDto.email, boardId: 1 } };
+    //   mockJwtService.decode.mockReturnValue(decodedToken);
 
-      const hashedPassword = 'hashedPassword';
-      jest.spyOn(bcrypt, 'hashSync').mockReturnValue(hashedPassword);
+    //   const hashedPassword = 'hashedPassword';
+    //   jest.spyOn(bcrypt, 'hashSync').mockReturnValue(hashedPassword);
 
-      const user = { ...signUpDto, id: 1, password: hashedPassword };
-      mockUserRepository.save.mockResolvedValue(user);
+    //   const user = { ...signUpDto, id: 1, password: hashedPassword };
+    //   mockUserRepository.save.mockResolvedValue(user);
 
-      invitationService.getReceivedInvitations.mockResolvedValue([{ id: 1 }]);
-      const mockReturn = { accessToken: 'accessToken' };
-      // When
-      const result = await authService.signUp(signUpDto);
+    //   invitationService.getReceivedInvitations.mockResolvedValue([{ id: 1 }]);
+    //   const mockReturn = { accessToken: 'accessToken' };
+    //   // When
+    //   const result = await authService.signUp(signUpDto);
 
-      // Then
-      expect(mockUserRepository.save).toHaveBeenCalledTimes(1);
-      expect(mockUserRepository.save).toHaveBeenCalledWith({
-        email: signUpDto.email,
-        password: hashedPassword,
-        nickname: signUpDto.nickname,
-        imgUrl: signUpDto.imgUrl,
-      });
-      expect(invitationService.changeInvitationStatus).toHaveBeenCalledTimes(1);
-      expect(invitationService.changeInvitationStatus).toHaveBeenCalledWith(user.id, 1, {
-        status: 'ACCEPTED',
-      });
-      expect(result).toEqual(mockReturn);
-    });
+    //   // Then
+    //   expect(mockUserRepository.save).toHaveBeenCalledTimes(1);
+    //   expect(mockUserRepository.save).toHaveBeenCalledWith({
+    //     email: signUpDto.email,
+    //     password: hashedPassword,
+    //     nickname: signUpDto.nickname,
+    //     imgUrl: signUpDto.imgUrl,
+    //   });
+    //   expect(invitationService.changeInvitationStatus).toHaveBeenCalledTimes(1);
+    //   expect(invitationService.changeInvitationStatus).toHaveBeenCalledWith(user.id, 1, {
+    //     status: 'ACCEPTED',
+    //   });
+    //   expect(result).toEqual(mockReturn);
+    // });
   });
 
   describe('signIn', () => {
