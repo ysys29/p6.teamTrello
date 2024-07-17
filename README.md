@@ -8,6 +8,7 @@
 - 개발 기간
 - 개발 환경
 - API 명세서 및 ERD 와이어 프레임
+- 파일 구조
 - 역할 분담
 - 주요 기능 및 설명
 - 트러블 슈팅
@@ -49,6 +50,132 @@
 
 - 와이어프레임 
 ![와이어프레임 PNG](https://github.com/user-attachments/assets/afc65fcc-3df3-4467-95f8-eff0519977b4)
+---
+### 폴더 구조
+
+```markdown
+📦src
+ ┣ 📂auth
+ ┃ ┣ 📂dtos
+ ┃ ┃ ┣ 📜sign-in.dto.ts
+ ┃ ┃ ┗ 📜sign-up.dto.ts
+ ┃ ┣ 📂interfaces
+ ┃ ┃ ┗ 📜jwt-payload.interface.ts
+ ┃ ┣ 📂strategies
+ ┃ ┃ ┣ 📜jwt.strategy.ts
+ ┃ ┃ ┗ 📜local.strategy.ts
+ ┃ ┣ 📜auth.controller.spec.ts
+ ┃ ┣ 📜auth.controller.ts
+ ┃ ┣ 📜auth.module.ts
+ ┃ ┣ 📜auth.service.spec.ts
+ ┃ ┗ 📜auth.service.ts
+ ┣ 📂board
+ ┃ ┣ 📂dtos
+ ┃ ┃ ┣ 📜create-board.dto.ts
+ ┃ ┃ ┗ 📜update-board.dto.ts
+ ┃ ┣ 📂entities
+ ┃ ┃ ┣ 📜board-member.entity.ts
+ ┃ ┃ ┗ 📜board.entity.ts
+ ┃ ┣ 📜board.controller.spec.ts
+ ┃ ┣ 📜board.controller.ts
+ ┃ ┣ 📜board.module.ts
+ ┃ ┣ 📜board.service.spec.ts
+ ┃ ┗ 📜board.service.ts
+ ┣ 📂card
+ ┃ ┣ 📂dto
+ ┃ ┃ ┣ 📜create-card-member.dto.ts
+ ┃ ┃ ┣ 📜create-card.dto.ts
+ ┃ ┃ ┣ 📜reorder-card.dto.ts
+ ┃ ┃ ┣ 📜search-card-member.dto.ts
+ ┃ ┃ ┣ 📜search-card.dto.ts
+ ┃ ┃ ┗ 📜update-card.dto.ts
+ ┃ ┣ 📂dummies
+ ┃ ┃ ┗ 📜cards.dummy.ts
+ ┃ ┣ 📂entities
+ ┃ ┃ ┣ 📜card-member.entity.ts
+ ┃ ┃ ┗ 📜card.entity.ts
+ ┃ ┣ 📜card.controller.spec.ts
+ ┃ ┣ 📜card.controller.ts
+ ┃ ┣ 📜card.module.ts
+ ┃ ┣ 📜card.service.spec.ts
+ ┃ ┗ 📜card.service.ts
+ ┣ 📂comment
+ ┃ ┣ 📂dto
+ ┃ ┃ ┣ 📜create-comment.dto.ts
+ ┃ ┃ ┣ 📜search-comment.dto.ts
+ ┃ ┃ ┗ 📜update-comment.dto.ts
+ ┃ ┣ 📂entities
+ ┃ ┃ ┗ 📜comment.entity.ts
+ ┃ ┣ 📜comment.controller.spec.ts
+ ┃ ┣ 📜comment.controller.ts
+ ┃ ┣ 📜comment.module.ts
+ ┃ ┣ 📜comment.service.spec.ts
+ ┃ ┗ 📜comment.service.ts
+ ┣ 📂configs
+ ┃ ┣ 📜database.config.ts
+ ┃ ┗ 📜env-validation.config.ts
+ ┣ 📂email
+ ┃ ┣ 📂dtos
+ ┃ ┃ ┣ 📜is-valid-email.dto.ts
+ ┃ ┃ ┣ 📜save-email.dto.ts
+ ┃ ┃ ┗ 📜send-email.dto.ts
+ ┃ ┣ 📂entities
+ ┃ ┃ ┗ 📜email.entity.ts
+ ┃ ┣ 📜email.controller.spec.ts
+ ┃ ┣ 📜email.controller.ts
+ ┃ ┣ 📜email.module.ts
+ ┃ ┣ 📜email.service.spec.ts
+ ┃ ┗ 📜email.service.ts
+ ┣ 📂invitation
+ ┃ ┣ 📂dtos
+ ┃ ┃ ┣ 📜invitation-id.dto.ts
+ ┃ ┃ ┣ 📜send-invitation.dto.ts
+ ┃ ┃ ┗ 📜update-invitation-status.dto.ts
+ ┃ ┣ 📂entities
+ ┃ ┃ ┗ 📜invitation.entity.ts
+ ┃ ┣ 📂types
+ ┃ ┃ ┗ 📜invitation-status.type.ts
+ ┃ ┣ 📜invitation.controller.spec.ts
+ ┃ ┣ 📜invitation.controller.ts
+ ┃ ┣ 📜invitation.module.ts
+ ┃ ┣ 📜invitation.service.spec.ts
+ ┃ ┗ 📜invitation.service.ts
+ ┣ 📂list
+ ┃ ┣ 📂dtos
+ ┃ ┃ ┣ 📜create-list.dto.ts
+ ┃ ┃ ┣ 📜list-id.dto.ts
+ ┃ ┃ ┣ 📜reorder-list.dto.ts
+ ┃ ┃ ┗ 📜update-list.dto.ts
+ ┃ ┣ 📂dummies
+ ┃ ┃ ┗ 📜lists.dummy.ts
+ ┃ ┣ 📂entities
+ ┃ ┃ ┗ 📜list.entity.ts
+ ┃ ┣ 📂types
+ ┃ ┃ ┗ 📜validate-list-access.type.ts
+ ┃ ┣ 📜list.controller.spec.ts
+ ┃ ┣ 📜list.controller.ts
+ ┃ ┣ 📜list.module.ts
+ ┃ ┣ 📜list.service.spec.ts
+ ┃ ┗ 📜list.service.ts
+ ┣ 📂user
+ ┃ ┣ 📂dtos
+ ┃ ┃ ┣ 📜search-user.dto.ts
+ ┃ ┃ ┗ 📜update-user.dto.ts
+ ┃ ┣ 📂entities
+ ┃ ┃ ┗ 📜user.entity.ts
+ ┃ ┣ 📜user.controller.spec.ts
+ ┃ ┣ 📜user.controller.ts
+ ┃ ┣ 📜user.module.ts
+ ┃ ┣ 📜user.service.spec.ts
+ ┃ ┗ 📜user.service.ts
+ ┣ 📜app.controller.ts
+ ┣ 📜app.module.ts
+ ┗ 📜main.ts
+ 📦test
+ ┣ 📜app.e2e-spec.ts
+ ┗ 📜jest-e2e.json
+```
+---
 
 ##  역할 분담
 - **이강산**
