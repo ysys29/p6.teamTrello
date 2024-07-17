@@ -40,14 +40,14 @@
 - Publish :
 ---
 ## API 명세서 및 ERD 와이어 프레임
-- API 명세서 : https://www.notion.so/teamsparta/c16935989d154f318c0b56091822d84f
+- API 명세서 
 ![image](https://github.com/user-attachments/assets/e5ebabd4-19b2-40d4-9216-96a8dc7443c4)
 
 
-- ERD : https://www.erdcloud.com/d/NQKHhEdS9LDiMjH2X
+- ERD 
 ![image](https://github.com/user-attachments/assets/2d82a2de-05c7-4347-a784-27b0816d8a5f)
 
-- 와이어프레임 : https://www.figma.com/design/yA6fAdwz0YFXkOF9kVU5sz/p6-wire-frame?node-id=0-1&t=FfWyT0zdcOd3u5X5-0
+- 와이어프레임 
 ![와이어프레임 PNG](https://github.com/user-attachments/assets/afc65fcc-3df3-4467-95f8-eff0519977b4)
 
 ##  역할 분담
