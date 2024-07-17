@@ -1,4 +1,4 @@
-(https://github.com/user-attachments/assets/266b43be-aca6-44d4-b13a-2c12b75f71ce)# 🖥️ Team 재밌어요 NodeJs 트렐로 프로젝트 (팀 협업 개발도구 만들기) 
+# 🖥️ Team 재밌어요 NodeJs 트렐로 프로젝트 (팀 협업 개발도구 만들기) 
 
 ![thumbnail](https://github.com/user-attachments/assets/974904ff-6aa1-4c4e-bcfa-350b3bdb383b)
 
