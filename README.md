@@ -319,4 +319,16 @@
   - https://github.com/ysys29/p6.teamTrello/blob/730a0ec1410a3fa100667853274cf7a7dcb6cfb7/src/invitation/invitation.service.ts#L33-L77
     ![보드초대보내기](https://github.com/user-attachments/assets/9174391b-6e2d-4583-843a-7e7e8695cd25)
 ## 트러블 슈팅
+### 외래키 관련 오류
+-![image (5)](https://github.com/user-attachments/assets/2c32426d-3ee1-4c34-bd01-d619bd718b00)
+- 참조하는 컬럼에는 unsignd:true의 속성값이 있었지만, 참조받는 컬럼에는 아무 속성이 없었다.
+- 양쪽 unsigned:true값을 삭제함으로써 에러를 해결할 수 있었다.
+
 ## 어려웠던 점 및 소감
+
+### 이강산
+### 이연서
+### 이성운
+- nest 어렵다. (추후 수정 )
+### 유승엽
+### 나지윤
