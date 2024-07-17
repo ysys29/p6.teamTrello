@@ -92,32 +92,46 @@
 - **1. 인증**
   - 5-1-1 인증이메일 발송
   - https://github.com/ysys29/p6.teamTrello/blob/7990392a796cb7cf8c5b44ae9cf44493e8eef0f0/src/email/email.service.ts#L28-L84
+    ![인증이메일보내기](https://github.com/user-attachments/assets/eea9f85f-d43b-4d71-81ce-50d3470bf08b)
+    ![이메일도착사진](https://github.com/user-attachments/assets/20218b73-7a1f-4510-aa35-a0de34c6d36d)
   - 5-1-2 회원가입
   - https://github.com/ysys29/p6.teamTrello/blob/7990392a796cb7cf8c5b44ae9cf44493e8eef0f0/src/auth/auth.service.ts#L25-L78
+   ![회원가입](https://github.com/user-attachments/assets/4e9d77a4-c77c-4f89-a6ea-4ebf72c34ab2)
   - 5-1-3 로그인
   - https://github.com/ysys29/p6.teamTrello/blob/cf4b883f2a7bdfaa41e134ff6e97f6415c9d5c28/src/auth/auth.service.ts#L80-L102
+    ![로그인](https://github.com/user-attachments/assets/228a2789-2bbb-42cc-96a0-a9b2e27b71e9)
 - **2. 유저**
   - 5-2-1 내 정보 조회
   - https://github.com/ysys29/p6.teamTrello/blob/cf4b883f2a7bdfaa41e134ff6e97f6415c9d5c28/src/user/user.service.ts#L17-L46
+    ![내정보조회](https://github.com/user-attachments/assets/be42d634-5b62-4b6f-9814-3e7c18219bbb)
   - 5-2-2 사용자 검색
   - https://github.com/ysys29/p6.teamTrello/blob/cf4b883f2a7bdfaa41e134ff6e97f6415c9d5c28/src/user/user.service.ts#L48-L55
+    ![사용자조회](https://github.com/user-attachments/assets/e78692d6-4364-4aad-9ea7-55efc6e14a18)
   - 5-2-3 내 정보 수정
   - https://github.com/ysys29/p6.teamTrello/blob/cf4b883f2a7bdfaa41e134ff6e97f6415c9d5c28/src/user/user.service.ts#L57-L78
+    ![내정보수정](https://github.com/user-attachments/assets/6b044231-85ef-45d3-ae66-ae77b4ce81c5)
   - 5-2-4 회원 탈퇴
   - https://github.com/ysys29/p6.teamTrello/blob/cf4b883f2a7bdfaa41e134ff6e97f6415c9d5c28/src/user/user.service.ts#L80-L91
+    ![내정보삭제](https://github.com/user-attachments/assets/23a17a65-3343-425f-8389-89c3d32ffa78)
 - **3. 보드**
   - 5-3-1 보드 생성
   - https://github.com/ysys29/p6.teamTrello/blob/cf4b883f2a7bdfaa41e134ff6e97f6415c9d5c28/src/board/board.service.ts#L21-L35
+    ![보드생성](https://github.com/user-attachments/assets/944cfd15-09ae-4d17-b269-202e6d63dc9f)
   - 5-3-2 보드 목록 검색
   - https://github.com/ysys29/p6.teamTrello/blob/cf4b883f2a7bdfaa41e134ff6e97f6415c9d5c28/src/board/board.service.ts#L189-L205
+    ![보드검색](https://github.com/user-attachments/assets/5b98a850-9d54-4f40-bb0d-d3cd73e5453a)
   - 5-3-3 보드 상세 조회
   - https://github.com/ysys29/p6.teamTrello/blob/cf4b883f2a7bdfaa41e134ff6e97f6415c9d5c28/src/board/board.service.ts#L37-L82
+    ![보드상세조회](https://github.com/user-attachments/assets/ddf11658-35ac-4003-b574-f66cc3bbb69e)
   - 5-3-4 보드 수정
   - https://github.com/ysys29/p6.teamTrello/blob/cf4b883f2a7bdfaa41e134ff6e97f6415c9d5c28/src/board/board.service.ts#L84-L104
+    ![보드수정](https://github.com/user-attachments/assets/739f4e94-40be-4e95-aeb9-6b94648c4d76)
   - 5-3-5 보드 삭제
   - https://github.com/ysys29/p6.teamTrello/blob/cf4b883f2a7bdfaa41e134ff6e97f6415c9d5c28/src/board/board.service.ts#L106-L120
+    ![보드삭제](https://github.com/user-attachments/assets/f7d1a9c0-8957-49bf-8e34-00083c72ac04)
   - 5-3-6 보드 멤버 조회
   - https://github.com/ysys29/p6.teamTrello/blob/cf4b883f2a7bdfaa41e134ff6e97f6415c9d5c28/src/board/board.service.ts#L122-L172
+    ![보드멤버조회](https://github.com/user-attachments/assets/9ff96f6a-76ec-4e5c-a67d-135544609a9a)
     
 - **4. 리스트**
   - 5-4-1 리스트 생성
@@ -155,9 +169,12 @@
 - **7. 초대**
   - 5-7-1 초대 기록 조회
   - https://github.com/ysys29/p6.teamTrello/blob/730a0ec1410a3fa100667853274cf7a7dcb6cfb7/src/invitation/invitation.service.ts#L79-L97
+    ![내가받은초대목록조회](https://github.com/user-attachments/assets/f8e4ab23-bedc-4d09-a841-2c52a317da08)
   - 5-7-2 초대 상태 변경
   - https://github.com/ysys29/p6.teamTrello/blob/730a0ec1410a3fa100667853274cf7a7dcb6cfb7/src/invitation/invitation.service.ts#L99-L148
+    ![초대상태변경](https://github.com/user-attachments/assets/ec6db308-9987-4f0f-b57d-ff17365de416)
   - 5-7-3 보드 초대
   - https://github.com/ysys29/p6.teamTrello/blob/730a0ec1410a3fa100667853274cf7a7dcb6cfb7/src/invitation/invitation.service.ts#L33-L77
+    ![보드초대보내기](https://github.com/user-attachments/assets/9174391b-6e2d-4583-843a-7e7e8695cd25)
 ## 트러블 슈팅
 ## 어려웠던 점 및 소감
