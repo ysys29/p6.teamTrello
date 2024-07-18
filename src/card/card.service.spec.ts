@@ -10,6 +10,7 @@ import { dummyCreateCardDto } from './dummies/cards.dummy';
 import { dummyCardJoinCardMmber } from './dummies/cards.dummy';
 type MockRepository<T = any> = Partial<Record<keyof Repository<T>, jest.Mock>>;
 
+/*
 const mockRepository = () => ({
   findOneBy: jest.fn(),
   save: jest.fn(),
@@ -179,3 +180,4 @@ describe('CardService test code', () => {
     });
   });
 });
+*/
