@@ -20,6 +20,8 @@ export class CardService {
     @InjectRepository(List) private readonly listRepository: Repository<List>,
     @InjectRepository(User) private readonly userRepository: Repository<User>,
     @InjectRepository(CardMember) private readonly cardMemberRepository: Repository<CardMember>,
+    private readonly sseService: SseService,
+    @InjectDataSource() private dataSource: DataSource,
   ) {}
 
   async create(createCardDto: CreateCardDto) {
