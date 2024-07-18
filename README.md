@@ -21,7 +21,7 @@
 - 구분 : 팀 프로젝트
 - GitHub : https://github.com/ysys29/p6.teamTrello
 - 시연 영상 : 
-- 배포 : 
+- 배포 : https://www.jaemisseoyo.site/api
 --- 
 ## 팀원 구성
 - 팀장 : 이강산 [@KangSanLee24](https://github.com/KangSanLee24)
@@ -35,7 +35,6 @@
 --- 
 ##  개발 환경
 - 운영체제 : Window/Mac
-- FrontEnd : X
 - BackEnd : TypeScript, NestJs, MySQL(TypeORM)
 - Tool : Visual Studio Code, Insomnia, DBeaver, Swagger
 - Publish :
@@ -54,6 +53,11 @@
 ### 폴더 구조
 
 ```markdown
+📦.github
+📦.vscode
+📦coverage
+📦dist
+📦node_modules
 📦src
  ┣ 📂auth
  ┃ ┣ 📂dtos
@@ -64,7 +68,6 @@
  ┃ ┣ 📂strategies
  ┃ ┃ ┣ 📜jwt.strategy.ts
  ┃ ┃ ┗ 📜local.strategy.ts
- ┃ ┣ 📜auth.controller.spec.ts
  ┃ ┣ 📜auth.controller.ts
  ┃ ┣ 📜auth.module.ts
  ┃ ┣ 📜auth.service.spec.ts
@@ -76,7 +79,6 @@
  ┃ ┣ 📂entities
  ┃ ┃ ┣ 📜board-member.entity.ts
  ┃ ┃ ┗ 📜board.entity.ts
- ┃ ┣ 📜board.controller.spec.ts
  ┃ ┣ 📜board.controller.ts
  ┃ ┣ 📜board.module.ts
  ┃ ┣ 📜board.service.spec.ts
@@ -94,7 +96,6 @@
  ┃ ┣ 📂entities
  ┃ ┃ ┣ 📜card-member.entity.ts
  ┃ ┃ ┗ 📜card.entity.ts
- ┃ ┣ 📜card.controller.spec.ts
  ┃ ┣ 📜card.controller.ts
  ┃ ┣ 📜card.module.ts
  ┃ ┣ 📜card.service.spec.ts
@@ -106,10 +107,8 @@
  ┃ ┃ ┗ 📜update-comment.dto.ts
  ┃ ┣ 📂entities
  ┃ ┃ ┗ 📜comment.entity.ts
- ┃ ┣ 📜comment.controller.spec.ts
  ┃ ┣ 📜comment.controller.ts
  ┃ ┣ 📜comment.module.ts
- ┃ ┣ 📜comment.service.spec.ts
  ┃ ┗ 📜comment.service.ts
  ┣ 📂configs
  ┃ ┣ 📜database.config.ts
@@ -121,10 +120,8 @@
  ┃ ┃ ┗ 📜send-email.dto.ts
  ┃ ┣ 📂entities
  ┃ ┃ ┗ 📜email.entity.ts
- ┃ ┣ 📜email.controller.spec.ts
  ┃ ┣ 📜email.controller.ts
  ┃ ┣ 📜email.module.ts
- ┃ ┣ 📜email.service.spec.ts
  ┃ ┗ 📜email.service.ts
  ┣ 📂invitation
  ┃ ┣ 📂dtos
@@ -135,10 +132,8 @@
  ┃ ┃ ┗ 📜invitation.entity.ts
  ┃ ┣ 📂types
  ┃ ┃ ┗ 📜invitation-status.type.ts
- ┃ ┣ 📜invitation.controller.spec.ts
  ┃ ┣ 📜invitation.controller.ts
  ┃ ┣ 📜invitation.module.ts
- ┃ ┣ 📜invitation.service.spec.ts
  ┃ ┗ 📜invitation.service.ts
  ┣ 📂list
  ┃ ┣ 📂dtos
@@ -152,7 +147,6 @@
  ┃ ┃ ┗ 📜list.entity.ts
  ┃ ┣ 📂types
  ┃ ┃ ┗ 📜validate-list-access.type.ts
- ┃ ┣ 📜list.controller.spec.ts
  ┃ ┣ 📜list.controller.ts
  ┃ ┣ 📜list.module.ts
  ┃ ┣ 📜list.service.spec.ts
@@ -171,9 +165,20 @@
  ┣ 📜app.controller.ts
  ┣ 📜app.module.ts
  ┗ 📜main.ts
- 📦test
- ┣ 📜app.e2e-spec.ts
- ┗ 📜jest-e2e.json
+ ┣ 📂test
+ ┃ ┣ 📜app.e2e-spec.ts
+ ┃ ┗ 📜jest-e2e.json
+.env
+.gitignore
+.eslintre.js
+.prettierrc
+.gitignore
+.nest-cli,json
+package-lock.json
+package.json
+README.md
+tsconfig.build.json
+tsconfig.json
 ```
 ---
 
@@ -327,8 +332,12 @@
 ## 어려웠던 점 및 소감
 
 ### 이강산
+- Typeorm-extention과 Faker.js로 데이터베이스에 Seeding하는 작업을 해보고 싶었지만, 모듈을 연결하는 과정에서 경로 문제로 인해 시간이 지체되어 구현하지 못했다.
 ### 이연서
+- 리스트의 순서 변경을 어떤식으로 구현해야 할지 막막했다. lexoRank로 순서 변경을 구현하는 게 재밌었다.
 ### 이성운
-- nest 어렵다. (추후 수정 )
+- nest에 대해 좀 더 가까워진 시간이었다. 특히 카드 순서 변경을 고민할때 Lexorank라는 기술을 알게 되어  재밌었다.
 ### 유승엽
+- 새로운 프레임워크에 적용하는 것이 쉽지 않았고, Trello프로젝트에서는 이동의 구현방법이 이해가 되지않았으나 팀원분들의 도움으로 이해하게 되었습니다.  
 ### 나지윤
+- 팀원들과 함께 긍정적으로 협업할 수 있는 환경이 되어 즐겁게 팀프로젝트에 참여하였다. 최근 개인 nest js 과제 때에는 js 조에 있어서 이번이 처음으로 접하는 nest js 프로젝트 였는데 낯설고 새로웠지만, 팀원들을 통해 새로운 기술을 경험해볼 수 있었음.
