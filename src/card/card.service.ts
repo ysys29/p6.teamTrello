@@ -10,6 +10,7 @@ import { List } from 'src/list/entities/list.entity';
 import { User } from 'src/user/entities/user.entity';
 import { CardMember } from './entities/card-member.entity';
 import { CreateCardMemberDto } from './dto/create-card-member.dto';
+import { SseService } from 'src/sse/sse.service';
 
 @Injectable()
 export class CardService {
@@ -19,6 +20,7 @@ export class CardService {
     @InjectRepository(List) private readonly listRepository: Repository<List>,
     @InjectRepository(User) private readonly userRepository: Repository<User>,
     @InjectRepository(CardMember) private readonly cardMemberRepository: Repository<CardMember>,
+    private readonly sseService: SseService,
     @InjectDataSource() private dataSource: DataSource,
   ) {}
 
@@ -218,14 +220,18 @@ export class CardService {
     if (!existedUser) throw new NotFoundException('유저 없음');
 
     // 유저가 이미 카드 작업자로 할당 되있다면 false반환
-    const existedWorker = await this.cardMemberRepository.findOneBy({ userId: userId });
+    const existedWorker = await this.cardMemberRepository.findOneBy({ userId: userId, cardId: cardId });
     if (existedWorker) throw new ConflictException('유저가 이미 등록되어있음.');
     //카드 작업자 할당 = 카드 작업자 데이터 생성
     const cardWorker = await this.cardMemberRepository.save({
       cardId,
       userId,
     });
-    return cardWorker;
+    this.sseService.emitCardChangeEvent(userId);
+    return {
+      cardWorker,
+      message: `${cardId}번 카드의 담당자가 ${userId}로 되었습니다 `,
+    };
   }
 
   // 작업자 제거

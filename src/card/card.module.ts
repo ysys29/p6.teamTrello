@@ -6,9 +6,9 @@ import { Card } from './entities/card.entity';
 import { CardMember } from './entities/card-member.entity';
 import { List } from 'src/list/entities/list.entity';
 import { User } from 'src/user/entities/user.entity';
-
+import { SseModule } from 'src/sse/sse.module';
 @Module({
-  imports: [TypeOrmModule.forFeature([Card, CardMember, List, User])],
+  imports: [TypeOrmModule.forFeature([Card, CardMember, List, User]), SseModule],
   controllers: [CardController],
   providers: [CardService],
 })
